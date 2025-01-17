@@ -1,0 +1,38 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using WebApplication1.Models.Entities
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle p-0" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @if (!string.IsNullOrEmpty(currentUser?.PictureUrl))
+                {
+                    <img src="@currentUser.PictureUrl" alt="@currentUser.UserName" class="rounded-circle" style="width: 40px; height: 40px;"> 
+                }
+                else
+                {
+                    @currentUser?.UserName
+                }
+            </a>
+            <div class="dropdown-menu" style="margin-left: -30px;" aria-labelledby="profileDropdown">
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Manage</a>
+                <form class="dropdown-item" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                    <button type="submit" class="dropdown-item p-0">Logout</button>
+                </form>
+            </div>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
+</ul>
