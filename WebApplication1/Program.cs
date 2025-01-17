@@ -20,7 +20,9 @@ namespace WebApplication1
             builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
-
+            
+            Task.Factory.StartNew(() => InitializeRoles(builder));
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -48,6 +50,24 @@ namespace WebApplication1
             app.MapRazorPages();
 
             app.Run();
+        }
+
+        private static async Task InitializeRoles(WebApplicationBuilder builder)
+        {
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+
+                string[] roleNames = { "Admin", "User", "Editor" };
+                foreach (var roleName in roleNames)
+                {
+                    if (!await roleManager.RoleExistsAsync(roleName))
+                    {
+                        await roleManager.CreateAsync(new Role { Name = roleName });
+                    }
+                }
+            }
         }
     }
 }
