@@ -1,5 +1,6 @@
-﻿@using WebApplication1.Models.Entities
-@model IEnumerable<Institution>
+﻿@using WebApplication1.Models.DTOs
+@using WebApplication1.Models.Entities
+@model IEnumerable<InstitutionDTO>
 
 @{
     ViewData["Title"] = "Institutions";
@@ -10,6 +11,7 @@
 <html>
 <head>
     <link rel="stylesheet" href="~/css/site.css" />
+    
 </head>
 <body>
 
@@ -35,18 +37,49 @@
     }
     else
     {
+        <!-- Joined classes carousel -->
+        <div class="flex flex-row overflow-x-scroll gap-2 mt-3 mx-auto container-fluid pb-2" style="display: flex !important; width: fit-content">
+            @foreach (var item in Model)
+            {
+                <form asp-action="GetInstitution" method="get">
+                    <div class="card" style="width: fit-content">
+                        @if (item.ImageUrl != null)
+                        {
+                            <img class="card-img-top" style="width: 280px !important; height: 180px !important;" src="@item.ImageUrl" alt="Card image cap">
+                        }
+                        else
+                        {
+                            <img class="card-img-top" style="width: 280px !important; height: 180px !important;" src="https://placehold.co/280x180" alt="Card image cap">
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">@item.Name</h5>
+                            <p class="card-text mb-0">@item.Address</p>
+                            <p class="card-text">@item.ContactEmail</p>
+                        
+                            
+                        </div>
 
+
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; border: none; padding: 0; margin: 0;"></button>
+
+                    </div>
+                </form>
+            }
+        </div>
     }
 
     
 
-    <button class="btn btn-primary" asp-action="Discover">Discover</button>
+    <a class="btn btn-primary mt-2" asp-action="Discover">Discover</a>
 
 	@if (User.IsInRole("ADMIN"))
 	{
-		<button class="btn btn-primary" asp-action="Create">Create</button>
+        <a class="btn btn-success mt-2" asp-action="Create">Create</a>
 	}
 
+
+    <!-- Join with code form} -->
     <div class="card p-3 mt-2" style="width: fit-content;">
         <form asp-action="Join" method="post">
             <div class="form-floating mb-3">

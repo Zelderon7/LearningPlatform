@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using asp_server.Models.Entity.JoinTables;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using WebApplication1.Data;
@@ -23,7 +25,9 @@ namespace WebApplication1.Controllers
 
         public IActionResult Index()
         {
-            var institutions = _context.Institutions.ToList(); // Fetch institutions if needed
+            var institutions = _context.Institutions
+                .Select(i => new InstitutionDTO(i))
+                .ToList(); // Fetch institutions if needed
             return View(institutions);
         }
 
@@ -69,8 +73,20 @@ namespace WebApplication1.Controllers
                 _context.Institutions.Add(institution);
                 _context.SaveChanges();
 
+                User user = await _userManager.GetUserAsync(User);
+
+                UserInstitution ui = new UserInstitution
+                {
+                    UserId = user.Id,
+                    InstitutionId = institution.InstitutionId,
+                    Role = "CREATOR"
+                };
+
+                _context.UserInstitutions.Add(ui);
+                _context.SaveChanges();
+
                 ViewData["Success"] = "Institution created successfully";
-                return RedirectToAction("Index");
+                return View("Index");
             }
             catch
             {
@@ -84,6 +100,35 @@ namespace WebApplication1.Controllers
         public IActionResult Create()
         {
             return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Discover()
+        {
+            var data = await _context.Institutions.Where(i => i.IsPublic)
+                .Select(i => new InstitutionDTO(i))
+                .ToListAsync();
+
+
+            return View(data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetInstitution(int id)
+        {
+            try
+            {
+                Institution? inst = await _context.Institutions.FindAsync(id);
+                if (inst == null)
+                    return NotFound();
+
+
+                return View("Institution", new InstitutionDTO(inst));
+            }
+            catch
+            {
+                return RedirectToAction("Index");
+            }
         }
     }
 }

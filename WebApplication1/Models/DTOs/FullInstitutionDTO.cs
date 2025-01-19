@@ -3,7 +3,7 @@ using WebApplication1.Models.Entities;
 
 namespace WebApplication1.Models.DTOs
 {
-    public class InstitutionDTO
+    public class FullInstitutionDTO
     {
         public int? Id { get; set; }
         [Required]
@@ -25,12 +25,12 @@ namespace WebApplication1.Models.DTOs
 
         public string? ImageUrl { get; set; }
 
-        public InstitutionDTO()
+        public FullInstitutionDTO()
         {
             
         }
 
-        public InstitutionDTO(int? id, string name, string address, string contactEmail, string code, bool isPublic, string? imageUrl)
+        public FullInstitutionDTO(int? id, string name, string address, string contactEmail, string code, bool isPublic, string? imageUrl)
         {
             Id = id;
             Name = name;
@@ -41,7 +41,7 @@ namespace WebApplication1.Models.DTOs
             ImageUrl = imageUrl;
         }
 
-        public InstitutionDTO(Institution inst)
+        public FullInstitutionDTO(Institution inst)
             :this(inst.InstitutionId, inst.Name, inst.Address, inst.ContactEmail, inst.Code, inst.IsPublic, inst.ImageUrl)
         {
             

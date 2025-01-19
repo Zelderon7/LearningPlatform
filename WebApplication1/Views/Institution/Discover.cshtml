@@ -1,0 +1,32 @@
+﻿@model IEnumerable<WebApplication1.Models.DTOs.InstitutionDTO>
+
+@{
+    ViewData["Title"] = "Discover";
+}
+
+
+<div class="container-fluid flex-row w-100 mt-3" style="display: flex !important; gap: 20px">
+
+    @foreach (var item in Model) {
+        <div class="card" style="width: 18rem;">
+            @if(item.ImageUrl != null)
+            {
+                <img class="card-img-top" src="@item.ImageUrl" alt="Card image cap">
+            } 
+            else
+            {
+                <img class="card-img-top" src="https://placehold.co/286x180" alt="Card image cap">
+            }
+            <div class="card-body">
+                <h5 class="card-title mb-3">@item.Name</h5>
+                <p class="card-text mb-0">@item.Address</p>
+                <p class="card-text">@item.ContactEmail</p>
+                <form asp-action="Join" method="post">
+			        <input type="hidden" name="code" value="@item.Code" />
+			        <button type="submit" class="btn btn-primary">Join</button>
+                </form>
+            </div>
+        </div>
+    }
+
+</div>
