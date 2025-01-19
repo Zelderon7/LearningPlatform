@@ -12,7 +12,7 @@
 
         [AllowNull]
         [MaxLength(250)]
-        public string? imageUrl { get; set; }
+        public string? ImageUrl { get; set; }
 
         [Required]
         [MaxLength(30)]

@@ -118,12 +118,15 @@ namespace WebApplication1.Controllers
         {
             try
             {
-                Institution? inst = await _context.Institutions.FindAsync(id);
+                Institution? inst = await _context.Institutions
+                    .Include(i => i.Classes)
+                    .FirstOrDefaultAsync(i => i.InstitutionId == id);
+
                 if (inst == null)
                     return NotFound();
 
 
-                return View("Institution", new InstitutionDTO(inst));
+                return View("Institution", new FullInstitutionDTO(inst));
             }
             catch
             {

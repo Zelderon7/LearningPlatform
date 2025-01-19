@@ -25,12 +25,14 @@ namespace WebApplication1.Models.DTOs
 
         public string? ImageUrl { get; set; }
 
+        public Class[]? Classes { get; set; }
+
         public FullInstitutionDTO()
         {
             
         }
 
-        public FullInstitutionDTO(int? id, string name, string address, string contactEmail, string code, bool isPublic, string? imageUrl)
+        public FullInstitutionDTO(int? id, string name, string address, string contactEmail, string code, bool isPublic, string? imageUrl, Class[]? classes)
         {
             Id = id;
             Name = name;
@@ -39,10 +41,11 @@ namespace WebApplication1.Models.DTOs
             IsPublic = isPublic;
             Code = code;
             ImageUrl = imageUrl;
+            Classes = classes;
         }
 
         public FullInstitutionDTO(Institution inst)
-            :this(inst.InstitutionId, inst.Name, inst.Address, inst.ContactEmail, inst.Code, inst.IsPublic, inst.ImageUrl)
+            :this(inst.InstitutionId, inst.Name, inst.Address, inst.ContactEmail, inst.Code, inst.IsPublic, inst.ImageUrl, inst.Classes.ToArray())
         {
             
         }

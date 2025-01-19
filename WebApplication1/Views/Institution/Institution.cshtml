@@ -12,6 +12,35 @@
     <img src="@(Model.ImageUrl ?? "https://placehold.co/280x180")" style="height: 100%;" />
     <h2>@Model.Name</h2>
 </div>
+<div style="height: 7rem;"></div>
+
+<!-- Admin options -->
+@if(User.IsInRole("ADMIN")){
+    <div style="display: flex; flex-direction: row; justify-content: end;">
+        <a class="btn btn-success mt-2" asp-controller="Class" asp-action="Create" asp-route-instId="@Model.Id">Create Class</a>
+    </div>
+}
 
 
-@if(Model)
+<!-- Classes -->
+<div class="container-fluid flex-row w-100 mt-3" style="display: flex !important; gap: 20px">
+
+    @foreach (var item in Model.Classes)
+    {
+        <div class="card" style="width: 18rem;">
+            @if (item.ImageUrl != null)
+            {
+                <img class="card-img-top" src="@item.ImageUrl" alt="Card image cap">
+            }
+            else
+            {
+                <img class="card-img-top" src="https://placehold.co/286x180" alt="Card image cap">
+            }
+            <div class="card-body">
+                <h5 class="card-title mb-3" style="font-weight: bold !important;">@item.Name</h5>
+                <p class="card-text">@item.Description</p>
+            </div>
+        </div>
+    }
+
+</div>
