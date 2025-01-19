@@ -24,3 +24,11 @@
     width: calc(100vw - 250px);
     height: calc(100vh - 120px);
 }
+
+.form-border {
+    padding: 10px !important;
+    border: solid !important;
+    border-width: 2px !important;
+    border-color: #495057 !important;
+    width: fit-content !important;
+}

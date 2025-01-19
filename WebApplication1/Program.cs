@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using WebApplication1.Areas.Identity;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
 
@@ -17,9 +20,28 @@ namespace WebApplication1
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+            builder.Services.AddScoped<RoleManager<Role>>();
+            builder.Services.AddScoped<UserManager<User>>();
+
+            builder.Services.AddScoped<IRoleStore<Role>, RoleStore<Role, ApplicationDbContext, int>>();
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.ClaimsIdentity.RoleClaimType = ClaimTypes.Role;
+            });
+            builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, CustomUserClaimsPrincipalFactory>();
+
             builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddRoles<Role>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            
+
+            
+
+
             builder.Services.AddControllersWithViews();
+
             
             Task.Factory.StartNew(() => InitializeRoles(builder));
             
@@ -42,7 +64,10 @@ namespace WebApplication1
 
             app.UseRouting();
 
+
+            app.UseAuthentication();
             app.UseAuthorization();
+            
 
             app.MapControllerRoute(
                 name: "default",
@@ -59,7 +84,7 @@ namespace WebApplication1
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
 
-                string[] roleNames = { "Admin", "User", "Editor" };
+                string[] roleNames = { "ADMIN", "USER", "STUDENT", "TEACHER" };
                 foreach (var roleName in roleNames)
                 {
                     if (!await roleManager.RoleExistsAsync(roleName))

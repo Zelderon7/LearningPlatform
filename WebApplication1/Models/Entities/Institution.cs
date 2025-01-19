@@ -10,6 +10,9 @@
         [Key]
         public int InstitutionId { get; set; }
 
+        [MaxLength(6)]
+        public string Code { get; set; }
+
         [Required]
         [MaxLength(255)]
         public string Name { get; set; }
@@ -28,6 +31,7 @@
         public Institution()
         {
             CreatedAt = DateTime.UtcNow;
+            Code = string.Join("", InstitutionId.GetHashCode().ToString().Reverse().Take(6));
         }
 
         // Navigation Properties
