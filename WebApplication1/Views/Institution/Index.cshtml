@@ -1,0 +1,35 @@
+﻿@using WebApplication1.Models.Entities
+@model IEnumerable<Institution>
+
+@{
+    ViewData["Title"] = "Institutions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model == null || !Model.Any())
+{
+    <h3>You haven't joined any institution yet...</h3>
+}
+else
+{
+    
+}
+
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @ViewData["Error"]
+    </div>
+}
+
+<button class="btn btn-primary" asp-action="Discover">Discover</button>
+
+<form asp-action="Join" method="post">
+    <div class="form-floating mb-3">
+        <input id="code" name="code" type="number" class="form-control" required placeholder="00000000" />
+        <label for="code" class="form-label">Code</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Join</button>
+</form>

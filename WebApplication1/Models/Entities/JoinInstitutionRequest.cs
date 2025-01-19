@@ -18,5 +18,18 @@ namespace WebApplication1.Models.Entities
 
         public Institution Institution { get; set; }
         public User User { get; set; }
+
+        public JoinInstitutionRequest()
+        {
+            
+        }
+
+        public JoinInstitutionRequest(User user, Institution institution)
+        {
+            InstitutionId = institution.InstitutionId;
+            User = user;
+            Institution = institution;
+            UserId = user.Id;
+        }
     }
 }

@@ -4,6 +4,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -103,30 +104,50 @@ namespace WebApplication1.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
-            {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
-                {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
-                    return RedirectToPage();
-                }
-            }
-
             var username = await _userManager.GetUserNameAsync(user);
-            if(Username != username)
+            if (Username != username)
             {
+                // Запазваме стария SecurityStamp
+                var oldSecurityStamp = user.SecurityStamp;
+
                 var setUsername = await _userManager.SetUserNameAsync(user, Username);
                 if (!setUsername.Succeeded)
                 {
                     StatusMessage = "Unexpected error when trying to set username.";
                     return RedirectToPage();
                 }
+
+                // Обновяваме SecurityStamp
+                await _userManager.UpdateSecurityStampAsync(user);
+
+                // Създаваме нови claims
+                var claims = await _userManager.GetClaimsAsync(user);
+                await _userManager.RemoveClaimsAsync(user, claims);
+
+                var newClaims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, Username),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            // Добавете други claims ако са необходими
+        };
+
+                await _userManager.AddClaimsAsync(user, newClaims);
+
+                // Принудително излизане и повторно влизане
+                await _signInManager.SignOutAsync();
+
+                // Презареждаме user обекта след промените
+                user = await _userManager.FindByIdAsync(user.Id.ToString());
+
+                // Влизаме отново с новите credentials
+                await _signInManager.SignInAsync(user, isPersistent: true);
+
+                StatusMessage = "Your username has been updated. Please use the new username for future logins.";
+                return RedirectToPage();
             }
 
-            await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            // ... останалата част от кода ...
+
             return RedirectToPage();
         }
     }
