@@ -22,7 +22,7 @@
                 <p class="card-text mb-0">@item.Address</p>
                 <p class="card-text">@item.ContactEmail</p>
                 <form asp-action="Join" method="post">
-			        <input type="hidden" name="code" value="@item.Code" />
+			        <input type="hidden" name="id" value="@item.Id" />
 			        <button type="submit" class="btn btn-primary">Join</button>
                 </form>
             </div>

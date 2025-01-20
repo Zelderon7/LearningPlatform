@@ -1,0 +1,61 @@
+﻿@model IEnumerable<WebApplication1.Models.Entities.JoinInstitutionRequest>
+
+@{
+    ViewData["Title"] = "RequestsList";
+}
+
+<h1>RequestsList</h1>
+
+<table class="table">
+    <thead>
+		<tr>
+			<th>
+				@Html.DisplayNameFor(model => model.User)
+			</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Message)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Institution)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+		<tr> 
+			<td style="align-content: center !important;">
+				<div style="display: flex !important; max-height: 60px; gap: 10px; align-content: center;">
+                        @if (!string.IsNullOrEmpty(item.User?.PictureUrl))
+                        {
+                            <img src="@item.User.PictureUrl" alt="@item.User.UserName" class="rounded-circle" style="width: 40px; height: 40px;">
+                        }
+                        else
+                        {
+                        }
+
+                        <p style="margin-bottom: 0px;">@item.User.UserName</p>
+                </div>
+			</td>
+            <td style="align-content: center !important;">
+                @Html.DisplayFor(modelItem => item.Message)
+            </td>
+            <td style="align-content: center !important;">
+                @Html.DisplayFor(modelItem => item.Institution.Name)
+            </td>
+            <td style="align-content: center !important;">
+                <div style="display: flex; justify-content: end; gap: 5px;">
+                    <form asp-controller="Institution" asp-action="AcceptRequest" method="post">
+                        <input type="hidden" name="requestId" value="@item.Id" />
+                        <button class="btn btn-success">Accept</button>
+                    </form>
+                    <form asp-controller="Institution" asp-action="RejectRequest" method="post">
+                        <input type="hidden" name="requestId" value="@item.Id" />
+                        <button class="btn btn-danger">Reject</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

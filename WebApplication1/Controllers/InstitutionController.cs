@@ -23,16 +23,61 @@ namespace WebApplication1.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            var institutions = _context.Institutions
+            User user = await _userManager.GetUserAsync(User);
+
+            var institutions = await _context.Institutions
+                .Include(i => i.UserInstitutions)
+                .Where(i => i.UserInstitutions.Any(ui => ui.UserId == user.Id))
                 .Select(i => new InstitutionDTO(i))
-                .ToList(); // Fetch institutions if needed
+                .ToListAsync(); // Fetch institutions if needed
+
             return View(institutions);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Join(string code)
+        public async Task<IActionResult> Join(int id)
+        {
+            try
+            {
+                var inst = await _context.Institutions.FirstOrDefaultAsync(i => i.InstitutionId == id);
+                if (inst == null)
+                {
+                    ViewData["Error"] = "Institution not found.";
+                    return View("Index", await _context.Institutions.Select(i => new FullInstitutionDTO(i)).ToListAsync());
+                }
+
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Challenge(); // Redirects to login if user is not authenticated
+                }
+
+                if (await _context.JoinInstitutionRequests.AnyAsync(r => r.UserId == user.Id && r.InstitutionId == inst.InstitutionId))
+                {
+                    // Get the referer URL from the request headers
+                    return Redirect(Request.Headers["Referer"].ToString());
+                }
+
+                var request = new JoinInstitutionRequest(user, inst);
+                _context.JoinInstitutionRequests.Add(request);
+                await _context.SaveChangesAsync();
+
+                // Get the referer URL from the request headers
+                var refererUrl = Request.Headers["Referer"].ToString();
+                return Redirect(refererUrl);
+            }
+            catch (Exception ex)
+            {
+                ViewData["Error"] = "An error occurred. Please try again.";
+                return View("Index", await _context.Institutions.Select(i => new FullInstitutionDTO(i)).ToListAsync());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> JoinWithCode(string code)
         {
             try
             {
@@ -40,13 +85,18 @@ namespace WebApplication1.Controllers
                 if (inst == null)
                 {
                     ViewData["Error"] = "Institution not found.";
-                    return View("Index", await _context.Institutions.ToListAsync());
+                    return View("Index", await _context.Institutions.Select(i => new FullInstitutionDTO(i)).ToListAsync());
                 }
 
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
                     return Challenge(); // Redirects to login if user is not authenticated
+                }
+
+                if(await _context.JoinInstitutionRequests.AnyAsync(r => r.UserId == user.Id && r.InstitutionId == inst.InstitutionId))
+                {
+                    return RedirectToAction("Index");
                 }
 
                 var request = new JoinInstitutionRequest(user, inst);
@@ -59,7 +109,7 @@ namespace WebApplication1.Controllers
             catch (Exception ex)
             {
                 ViewData["Error"] = "An error occurred. Please try again.";
-                return View("Index", await _context.Institutions.ToListAsync());
+                return View("Index", await _context.Institutions.Select(i => new FullInstitutionDTO(i)).ToListAsync());
             }
         }
 
@@ -118,13 +168,26 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                User user = await _userManager.GetUserAsync(User);
+                bool filterPrivateClasses = !await _userManager.IsInRoleAsync(user, "ADMIN");
+
                 Institution? inst = await _context.Institutions
                     .Include(i => i.Classes)
+                        .ThenInclude(c => c.UserClasses)
                     .FirstOrDefaultAsync(i => i.InstitutionId == id);
+
+                inst.Classes = inst.Classes
+                    .Where(c => filterPrivateClasses ? c.IsPublic || c.UserClasses.Any(uc => uc.UserId == user.Id) : true)
+                    .ToList();
 
                 if (inst == null)
                     return NotFound();
 
+                if(!await _context.UserInstitutions
+                    .AnyAsync(ui => ui.InstitutionId == id && ui.UserId == user.Id))
+                {
+                    return Unauthorized();
+                }
 
                 return View("Institution", new FullInstitutionDTO(inst));
             }
@@ -132,6 +195,107 @@ namespace WebApplication1.Controllers
             {
                 return RedirectToAction("Index");
             }
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet]
+        public async Task<IActionResult> GetRequests(int? instId)
+        {
+            List<JoinInstitutionRequest> requests;
+            if(instId == null)
+            {
+                requests = await _context.JoinInstitutionRequests
+                    .Include(ji => ji.User)
+                    .Include(ji => ji.Institution)
+                    .ToListAsync();
+            }
+            else
+            {
+                requests = await _context.JoinInstitutionRequests
+                    .Include(ji => ji.User)
+                    .Include(ji => ji.Institution)
+                    .Where(ji => ji.InstitutionId == instId)
+                    .ToListAsync();
+            }
+            
+
+            return View("RequestsList", requests);
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        public async Task<IActionResult> AcceptRequest(int requestId)
+        {
+            JoinInstitutionRequest? request = await _context.JoinInstitutionRequests
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+            if (request == null)
+                return NotFound();
+
+            UserInstitution ui = new UserInstitution
+            {
+                InstitutionId = request.InstitutionId,
+                UserId = request.UserId,
+                Role = "STUDENT"
+            };
+
+            if(!await _context.UserInstitutions
+                .AnyAsync(x => x.InstitutionId == ui.InstitutionId && x.UserId == ui.UserId))
+            {
+                _context.UserInstitutions.Add(ui);
+            }
+            _context.JoinInstitutionRequests.Remove(request);
+            _context.SaveChanges();
+
+
+            // Get the referer URL from the request headers
+            var refererUrl = Request.Headers["Referer"].ToString();
+            return Redirect(refererUrl);
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        public async Task<IActionResult> RejectRequest(int requestId)
+        {
+            JoinInstitutionRequest? request = await _context.JoinInstitutionRequests
+                .FirstOrDefaultAsync(r => r.Id == requestId);
+            if (request == null)
+                return NotFound();
+
+            _context.JoinInstitutionRequests.Remove(request);
+            _context.SaveChanges();
+
+
+            // Get the referer URL from the request headers
+            var refererUrl = Request.Headers["Referer"].ToString();
+            return Redirect(refererUrl);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetParticipants(int instId)
+        {
+            List<User> participants = await _context.UserInstitutions
+                .Include(ui => ui.User)
+                .Where(ui => ui.InstitutionId == instId)
+                .Select(ui => ui.User)
+                .ToListAsync();
+
+            ViewData["instId"] = instId;
+            return View("ParticipantsList", participants);
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromInstitution(int userId, int instId)
+        {
+            UserInstitution? ui = await _context.UserInstitutions
+                .FirstOrDefaultAsync(x => x.InstitutionId == instId && x.UserId == userId);
+            
+            if(ui == null) return NotFound();
+
+            _context.UserInstitutions.Remove(ui);
+            _context.SaveChanges();
+
+            return Redirect(Request.Headers["Referer"].ToString());
         }
     }
 }

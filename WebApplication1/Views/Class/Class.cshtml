@@ -1,0 +1,24 @@
+﻿@model WebApplication1.Models.Entities.Class;
+
+@*
+       
+*@
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- Header -->
+<div class="institution-header">
+    <img src="@(Model.ImageUrl ?? "https://placehold.co/280x180")" style="height: 100%;" />
+    <h2>@Model.Name</h2>
+</div>
+<div style="height: 7rem;"></div>
+
+<!-- Admin options -->
+@if (User.IsInRole("ADMIN"))
+{
+    <div style="display: flex; flex-direction: row; justify-content: end; gap: 5px !important;">
+        <a class="btn btn-primary mt-2" asp-controller="Class" asp-action="GetUsersToAdd" asp-route-classId="@Model.ClassId">Add Participant</a>
+    </div>
+}

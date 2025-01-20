@@ -1,0 +1,44 @@
+﻿@model IEnumerable<WebApplication1.Models.Entities.User>
+
+@{
+    ViewData["Title"] = "ParticipantsList";
+}
+
+<h1>ParticipantsList</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td style="align-content: center !important;">
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td style="align-content: center !important;">
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td style="align-content: center !important;">
+                    <form action="RemoveFromInstitution" method="post" style="display: flex !important; justify-content: end !important;">
+                    <input type="hidden" name="userId" value="@item.Id" />
+                    <input type="hidden" name="instId" value="@ViewData["instId"]" />
+                    <button class="btn btn-danger" type="submit">Remove</button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
