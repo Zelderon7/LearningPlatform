@@ -1,10 +1,10 @@
 ﻿@model WebApplication1.Models.Entities.Class;
 
 @*
-       
+
 *@
 @{
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 
@@ -18,7 +18,16 @@
 <!-- Admin options -->
 @if (User.IsInRole("ADMIN"))
 {
-    <div style="display: flex; flex-direction: row; justify-content: end; gap: 5px !important;">
-        <a class="btn btn-primary mt-2" asp-controller="Class" asp-action="GetUsersToAdd" asp-route-classId="@Model.ClassId">Add Participant</a>
+    <div style="display: flex; flex-direction: row; gap: 5px !important;">
+        <a class="btn btn-success mt-2" asp-controller="Class" asp-action="CreateSection" asp-route-classId="@Model.ClassId">Add Section</a>
+        <a class="btn btn-primary mt-2" style="margin-left: auto;" asp-controller="Class" asp-action="GetUsersToAdd" asp-route-classId="@Model.ClassId">Add Participant</a>
     </div>
 }
+
+<div style="display: flex; flex-direction: column;">
+    @foreach(var item in Model.ClassSections.OrderBy(cs => cs.OrderIndex)){
+        <div class="card-body">
+            <h2>@item.Title</h2>
+        </div>
+    }
+</div>
