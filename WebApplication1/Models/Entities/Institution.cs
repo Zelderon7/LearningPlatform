@@ -39,6 +39,7 @@
         // Navigation Properties
         public ICollection<Class> Classes { get; set; }
         public ICollection<UserInstitution> UserInstitutions { get; set; }
+        public ICollection<JoinInstitutionRequest> JoinInstitutionRequests { get; set; }
     }
 
 }

@@ -155,7 +155,15 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<IActionResult> Discover()
         {
-            var data = await _context.Institutions.Where(i => i.IsPublic)
+            User user = await _userManager.GetUserAsync(User);
+            bool showPrivate = await _userManager.IsInRoleAsync(user, "ADMIN");
+
+            var data = await _context.Institutions
+                .Include(i => i.JoinInstitutionRequests)
+                .Include(i => i.UserInstitutions)
+                .Where(i => showPrivate || i.IsPublic)
+                .Where(i => !i.JoinInstitutionRequests.Any(jir => jir.UserId == user.Id) 
+                    && !i.UserInstitutions.Any(ui => ui.UserId == user.Id))
                 .Select(i => new InstitutionDTO(i))
                 .ToListAsync();
 
@@ -287,15 +295,18 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveFromInstitution(int userId, int instId)
         {
-            UserInstitution? ui = await _context.UserInstitutions
-                .FirstOrDefaultAsync(x => x.InstitutionId == instId && x.UserId == userId);
-            
-            if(ui == null) return NotFound();
+            var userInstitutionId = await _context.UserInstitutions
+                .Where(ui => ui.UserId == userId && ui.InstitutionId == instId)
+                .Select(ui => ui.UserInstitutionId)
+                .FirstOrDefaultAsync();
 
-            _context.UserInstitutions.Remove(ui);
-            _context.SaveChanges();
+            if (userInstitutionId == 0) return NotFound();
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "EXEC DeleteUserInstitution @p0", userInstitutionId);
 
             return Redirect(Request.Headers["Referer"].ToString());
         }
+
     }
 }
