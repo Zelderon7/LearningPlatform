@@ -77,9 +77,8 @@
 	    @if (User.IsInRole("ADMIN"))
 	    {
             <a class="btn btn-success mt-2" asp-action="Create">Create</a>
+            <a class="btn btn-primary mt-2" style="margin-left: auto;" asp-action="GetRequests">Manage Requests</a>
 	    }
-
-        <a class="btn btn-primary mt-2" style="margin-left: auto;" asp-action="GetRequests">Manage Requests</a>
         
     </div>
 
