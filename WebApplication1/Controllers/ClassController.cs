@@ -180,5 +180,18 @@ namespace WebApplication1.Controllers
                 return StatusCode(500);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSection(int id)
+        {
+            ClassSection? section = _context.ClassSections
+                .Include(x => x.Lessons)
+                .FirstOrDefault(s => s.Id == id);
+
+            if (section == null)
+                return NotFound();
+
+            return View("ClassSection", section);
+        }
     }
 }

@@ -24,10 +24,12 @@
     </div>
 }
 
-<div style="display: flex; flex-direction: column;">
+<div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
     @foreach(var item in Model.ClassSections.OrderBy(cs => cs.OrderIndex)){
-        <div class="card-body">
-            <h2>@item.Title</h2>
+        <div class="class-section-card">
+            <a asp-action="GetSection" asp-route-id="@item.Id" style="opacity: 0; position: absolute; width:inherit; height: inherit;"></a>
+            <img src="@(item.PictureUrl ?? "https://placehold.co/280x180")" />
+            <p>@item.Title</p>
         </div>
     }
 </div>
