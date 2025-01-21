@@ -11,6 +11,9 @@ namespace WebApplication1.Models.Entities
         [Required, MaxLength(100)]
         public string Title { get; set; }
 
+        [Required]
+        public int OrderIndex { get; set; }
+
         [ForeignKey("Class")]
         public int ClassId { get; set; }
 
