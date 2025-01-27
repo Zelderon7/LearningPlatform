@@ -7,8 +7,8 @@
     @if (SignInManager.IsSignedIn(User))
     {
         var currentUser = await UserManager.GetUserAsync(User);
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle p-0" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <li>
+            <a style="border: 0;"  asp-area="Identity" asp-page="/Account/Manage/Index">
                 @if (!string.IsNullOrEmpty(currentUser?.PictureUrl))
                 {
                     <img src="@currentUser.PictureUrl" alt="@currentUser.UserName" class="rounded-circle" style="width: 40px; height: 40px;"> 
@@ -18,9 +18,8 @@
                     @currentUser?.UserName
                 }
             </a>
-            <div class="dropdown-menu" style="margin-left: -30px;" aria-labelledby="profileDropdown">
-                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">Manage</a>
-                <form class="dropdown-item" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+            <div style="margin-top: 10px;">
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
                     <button type="submit" class="dropdown-item p-0">Logout</button>
                 </form>
             </div>
@@ -29,10 +28,10 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="button primary fit" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
-        <li class="nav-item">
-            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <li class="nav-item" style="margin-top: 10px;">
+            <a class="button fit" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
     }
 </ul>
