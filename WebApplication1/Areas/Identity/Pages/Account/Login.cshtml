@@ -6,15 +6,15 @@
     ViewData["Title"] = "Log in";
 }
 
-<link rel="stylesheet" href="~/css/bootstrap.css" />
+<link rel="stylesheet" href="~/css/site.css" />
 
-<h1>@ViewData["Title"]</h1>
-<div class="row m-auto">
-    <div class="col-md-4">
+
+<div class="login-form-outer">
+    <div class="login-form-container">
+        <h1>@ViewData["Title"]</h1>
         <section>
             <form id="account" method="post">
-                <h2>Use a local account to log in.</h2>
-                <hr />
+                
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
                     <input asp-for="Input.EmailOrUsername" class="form-control" aria-required="true" placeholder="name@example.com" />
@@ -27,8 +27,9 @@
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="checkbox mb-3">
+
+                    <input class="form-check-input" asp-for="Input.RememberMe" />
                     <label asp-for="Input.RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
                         @Html.DisplayNameFor(m => m.Input.RememberMe)
                     </label>
                 </div>
@@ -49,6 +50,7 @@
             </form>
         </section>
     </div>
+    <!--
     <div class="col-md-6 col-md-offset-2">
         <section>
             <h3>Use another service to log in.</h3>
@@ -79,6 +81,7 @@
             }
         </section>
     </div>
+    -->
 </div>
 
 @section Scripts {
