@@ -65,13 +65,14 @@
     
     <div style="display: flex; gap: 5px;">
 
-        <a class="btn btn-primary" asp-action="Discover">Discover</a>
+        <a class="btn btn-primary" style="margin-left: 10px;" asp-action="Discover">Discover</a>
 
 	    @if (User.IsInRole("ADMIN"))
 	    {
             <a class="btn btn-success" asp-action="Create">Create</a>
+            <a class="btn btn-primary" style="margin-left: auto; margin-right: 10px;" asp-action="GetRequests">Manage Requests</a>
 	    }
 
-        <a class="btn btn-primary" style="margin-left: auto;" asp-action="GetRequests">Manage Requests</a>
+        
         
     </div>

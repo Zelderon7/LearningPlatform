@@ -11,17 +11,17 @@
     <img src="@(Model.PictureUrl ?? "https://placehold.co/280x180")" style="height: 100%;" />
     <h2>@Model.Title</h2>
 </div>
-<div style="height: 7rem;"></div>
+<div style="height: 30px;"></div>
 
 @if(User.IsInRole("ADMIN")){
-	<div class="my-3 flex flex-row gap-2">
+	<div class="admin-options">
 		<a class="btn btn-success">New Lesson</a>
 	</div>	
 }
 
-<div class="card mt-3">
-    <h5 class="card-header">Lessons</h5>
-    <div class="card-body">
+<div class="lessons-container">
+    <h5>Lessons</h5>
+    <div>
 		@if(Model.Lessons.Count > 0){
 			<ul>
 				@foreach (var item in Model.Lessons.OrderBy(l => l.OrderIndex))
@@ -33,7 +33,7 @@
 			</ul>
 		}
 		else{
-			<p class="text-muted">There are no lessons yet :(</p>
+			<p>There are no lessons yet :(</p>
 		}
 		
     </div>
