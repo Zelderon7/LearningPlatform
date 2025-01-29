@@ -26,10 +26,9 @@
 <div class="class-sections">
     @foreach (var item in Model.ClassSections.OrderBy(cs => cs.OrderIndex))
     {
-        <div class="class-section-card">
-            <a asp-action="GetSection" asp-route-id="@item.Id" class="class-section-link"></a>
+        <a class="class-section-card" asp-action="GetSection" asp-route-id="@item.Id">
             <img src="@(item.PictureUrl ?? "https://placehold.co/280x180")" alt="Section Image" class="section-image" />
-            <p class="section-title">@item.Title</p>
-        </div>
+            <p>@item.Title</p>
+        </a>
     }
 </div>

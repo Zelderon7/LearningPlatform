@@ -440,6 +440,7 @@ div.checkbox {
     flex-direction: row;
     justify-content: flex-end;
     gap: 5px;
+    margin-bottom: 30px;
 }
 
 .classes-container {
@@ -538,4 +539,28 @@ div.checkbox {
 
 .joined-classes-container form{
     margin: 0;
+}
+
+.class-sections{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.class-section-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px;
+    width: 60%;
+    background-image: linear-gradient(to right, #414975, #392443);
+}
+
+.class-section-card img{
+    width: 150px;
+}
+
+.class-section-card p{
+    margin: 0 0 0 30px;
 }
