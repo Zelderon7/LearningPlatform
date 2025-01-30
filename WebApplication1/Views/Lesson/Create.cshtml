@@ -1,16 +1,14 @@
 ﻿@model WebApplication1.Models.VMs.LessonVM
-@model LessonAndContentVM
+
 <h2>Create Lesson</h2>
-}
+
 <form asp-action="Create" method="post">
     <div class="form-group">
         <label asp-for="Title"></label>
         <input asp-for="Title" class="form-control" />
     </div>
-    <div class="form-group">
-        <label asp-for="ClassSectionId"></label>
-        <input asp-for="ClassSectionId" class="form-control" />
-    </div>
+
+    <input asp-for="ClassSectionId" type="hidden" />
 
     <h3>Contents</h3>
     <div id="contents-list">
@@ -25,12 +23,15 @@
 <div id="content-template" style="display: none;">
     <div class="content-item">
         <select class="form-control content-type">
-            <option value="header">Header</option>
-            <option value="text">Text</option>
-            <option value="bulletpoints">Bullet Points</option>
+            <option value="Text">Text</option>
+            <option value="Paragraph">Paragraph</option>
+            <option value="Bulletpoints">Bullet Points</option>
+            <option value="Title">Title</option>
+            <option value="SubTitle">SubTitle</option>
+            <option value="Code">Code</option>
             <option value="image">Image</option>
         </select>
-        <input type="text" class="form-control content-data" placeholder="Enter data..." />
+        <textarea class="form-control content-data" placeholder="Enter data..."></textarea>
         <input type="hidden" class="content-order" value="0" />
         <button type="button" class="btn btn-danger remove-content">Remove</button>
     </div>
@@ -39,7 +40,7 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+                document.addEventListener("DOMContentLoaded", function () {
             const contentsList = document.getElementById("contents-list");
             const addContentButton = document.getElementById("add-content");
             const contentTemplate = document.getElementById("content-template").innerHTML;
@@ -50,8 +51,22 @@
             addContentButton.addEventListener("click", function () {
                 const newContent = document.createElement("div");
                 newContent.innerHTML = contentTemplate;
+
+                // Update the names of the input fields to match the model binding format
+                newContent.querySelector(".content-type").name = `contents[${contentIndex}].Type`;
+                newContent.querySelector(".content-data").name = `contents[${contentIndex}].Context`;
+                newContent.querySelector(".content-order").name = `contents[${contentIndex}].OrderIndex`;
+
                 newContent.querySelector(".content-order").value = contentIndex++;
                 contentsList.appendChild(newContent);
+
+                // Add event listener to prevent form submission on Enter key press
+                const contentDataInput = newContent.querySelector(".content-data");
+                contentDataInput.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault(); // Prevent form submission
+                    }
+                });
             });
 
             // Remove content
@@ -70,13 +85,24 @@
                 }
             });
 
-            // Update OrderIndex values after reordering
+            // Update OrderIndex values after reordering or removing items
             function updateOrderIndexes() {
                 const items = contentsList.querySelectorAll(".content-item");
                 items.forEach((item, index) => {
                     item.querySelector(".content-order").value = index;
+                    item.querySelector(".content-order").name = `contents[${index}].OrderIndex`;
                 });
             }
+
+            // Prevent form submission on Enter key press for existing content inputs
+            const existingContentInputs = document.querySelectorAll(".content-data");
+            existingContentInputs.forEach(input => {
+                input.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault(); // Prevent form submission
+                    }
+                });
+            });
         });
     </script>
-}</div>
+}

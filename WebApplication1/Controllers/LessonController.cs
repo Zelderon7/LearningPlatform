@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.VMs;
 
 namespace WebApplication1.Controllers
 {
@@ -52,12 +53,45 @@ namespace WebApplication1.Controllers
             if(!classSection.Class.UserClasses.Any(uc => uc.UserId == user.Id))
                 return Unauthorized();
 
-            var model = new LessonVM();
+            var model = new LessonVM() 
+            {
+                ClassSectionId = classSectionId,
+            };
             return View(model);
         }
 
-            return View(lesson);
-        }
+        [HttpPost]
+        public async Task<IActionResult> Create(LessonVM lessonVM, List<LessonContentVM> contents)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Log validation errors
+                foreach (var state in ModelState)
+                {
+                    foreach (var error in state.Value.Errors)
+                    {
+                        Console.WriteLine($"Error in {state.Key}: {error.ErrorMessage}");
+                    }
+                }
 
+                return View(lessonVM);
+            }
+
+            // Proceed with saving the lesson and contents
+            var lesson = new Lesson
+            {
+                Title = lessonVM.Title,
+                ClassSectionId = lessonVM.ClassSectionId,
+                OrderIndex = 0, // Set this as needed
+                Contents = contents
+                    .Select(c => c.ToLessonContent())
+                    .ToList()
+            };
+
+            _context.Lessons.Add(lesson);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", new { lessonId = lesson.Id });
+        }
     }
 }
