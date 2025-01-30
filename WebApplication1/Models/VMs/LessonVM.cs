@@ -13,6 +13,9 @@ namespace WebApplication1.Models.VMs
         [Required]
         public int OrderIndex { get; set; }
 
+        [Required]
+        public int ClassSectionId { get; set; }
+
         public List<LessonContentVM> Contents { get; set; } = new List<LessonContentVM>();
     }
 }

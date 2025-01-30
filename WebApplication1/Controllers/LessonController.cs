@@ -53,7 +53,7 @@ namespace WebApplication1.Controllers
             if(!classSection.Class.UserClasses.Any(uc => uc.UserId == user.Id))
                 return Unauthorized();
 
-            var model = new LessonAndContentVM();
+            var model = new LessonVM();
             return View(model);
         }
 
