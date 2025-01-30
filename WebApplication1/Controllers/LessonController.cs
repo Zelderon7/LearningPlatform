@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
-using WebApplication1.Models.VMs;
 
 namespace WebApplication1.Controllers
 {
@@ -57,11 +56,7 @@ namespace WebApplication1.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddContent(LessonAndContentVM contentVM)
-        {
-            contentVM.Lesson.Contents.Add(contentVM.LessonContent);
-            return View("Create", contentVM);
+            return View(lesson);
         }
 
     }
