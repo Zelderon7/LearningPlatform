@@ -1,13 +1,30 @@
-﻿@model WebApplication1.Models.Entities.Lesson;
+﻿@using WebApplication1.Models.VMs;
+@model LessonAndContentVM
 
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
 @{
+	ViewData["Title"] = "Create Lesson";
 }
 
-<div class="flex flex-row gap-2 mt-3">
-	<a class="btn btn-primary">Add</a>
-	<a class="btn btn-success" style="margin-left: auto;">Finish</a>
-	<a class="btn btn-info">Preview</a>
+<h1>Create Lesson</h1>
+<hr />
+
+<div class="lesson-contents-container">
+	@if(Model.Lesson.Contents.Count > 0)
+	{
+		foreach (var item in Model.Lesson.Contents.OrderBy(x => x.OrderIndex))
+		{
+			<partial name="Partials/_LessonContentPartial" model="item" />
+		}
+	}
+	else
+	{
+		<h3>Nothing here yet... :(</h3>
+	}
+	
+</div>
+
+<hr />
+
+<div class="create-new-content">
+	@await Html.PartialAsync("Partials/_AddContentFormPartial", Model)
 </div>

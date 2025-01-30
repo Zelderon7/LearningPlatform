@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.VMs;
 
 namespace WebApplication1.Controllers
 {
@@ -52,13 +53,15 @@ namespace WebApplication1.Controllers
             if(!classSection.Class.UserClasses.Any(uc => uc.UserId == user.Id))
                 return Unauthorized();
 
-            Lesson lesson = new()
-            {
-                Title = "",
-                ClassSectionId = classSectionId,
-            };
+            var model = new LessonAndContentVM();
+            return View(model);
+        }
 
-            return View(lesson);
+        [HttpPost]
+        public async Task<IActionResult> AddContent(LessonAndContentVM contentVM)
+        {
+            contentVM.Lesson.Contents.Add(contentVM.LessonContent);
+            return View("Create", contentVM);
         }
 
     }

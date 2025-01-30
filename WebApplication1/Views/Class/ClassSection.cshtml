@@ -15,7 +15,7 @@
 
 @if(User.IsInRole("ADMIN")){
 	<div class="admin-options">
-		<a class="btn btn-success">New Lesson</a>
+		<a class="btn btn-success" asp-controller="Lesson" asp-action="Create" asp-route-classSectionId="@Model.Id">New Lesson</a>
 	</div>	
 }
 
