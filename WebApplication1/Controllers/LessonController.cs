@@ -39,6 +39,28 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetLesson(int id)
+        {
+            User user = await _userManager.GetUserAsync(User);
+
+            Lesson? lesson = _context.Lessons
+                .Include(l => l.Contents)
+                .Include(l => l.Section)
+                    .ThenInclude(cs => cs.Class)
+                        .ThenInclude(c => c.UserClasses)
+                .Where(l => l.Id == id)
+                .Where(l => l.Section.Class.UserClasses
+                    .Any(uc => uc.UserId == user.Id))
+                .FirstOrDefault();
+
+            if (lesson == null)
+                return NotFound();
+
+            return View("Lesson", lesson);
+
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Create(int classSectionId)
         {
             User user = await _userManager.GetUserAsync (User);

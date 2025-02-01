@@ -1,4 +1,5 @@
-﻿@model WebApplication1.Models.Entities.Lesson;
+﻿@using WebApplication1.Models.VMs;
+@model WebApplication1.Models.Entities.Lesson;
 
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -10,10 +11,7 @@
 
 @foreach (var item in Model.Contents.OrderBy(l => l.OrderIndex))
 {
-	<div class="card mt-3">
-		<h5 class="card-header">@item.Type</h5>
-		<div class="card-body">
-			@Html.Raw(item.Context)
-		</div>
+	<div class="lesson-content-view">
+		<partial name="../Lesson/Partials/_LessonContentPartial" model="@new LessonContentVM(item)" />
 	</div>
-})
+}

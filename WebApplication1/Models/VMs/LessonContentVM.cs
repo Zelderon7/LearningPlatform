@@ -17,6 +17,20 @@ namespace WebApplication1.Models.VMs
         [Required]
         public int LessonId { get; set; }
 
+        public LessonContentVM()
+        {
+            
+        }
+
+        public LessonContentVM(LessonContent content)
+        {
+            Id = content.Id;
+            Type = content.Type;
+            OrderIndex = content.OrderIndex;
+            Context = content.Context;
+            LessonId = content.LessonId;
+        }
+
         internal LessonContent ToLessonContent()
         {
             return new LessonContent

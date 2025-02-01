@@ -27,7 +27,7 @@
 				@foreach (var item in Model.Lessons.OrderBy(l => l.OrderIndex))
 				{
 					<li>
-						<a href="@Url.Action("GetLesson", "Class", new { id = item.Id })">@item.Title</a>
+						<a href="@Url.Action("GetLesson", "Lesson", new { id = item.Id })">@item.Title</a>
 					</li>
 				}
 			</ul>
