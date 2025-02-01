@@ -7,15 +7,47 @@
 		break;
 
 	case "IMAGE":
-		<img src="@Model.Context" />
+		<img src="@Model.Context" style="max-width: 50%; max-height: 300px;"  />
 		break;
 
-	case "HEADER":
+	case "TITLE":
 		<h3>@Model.Context</h3>
 		break;
 
+	case "SUBTITLE":
+		<h4>@Model.Context</h4>
+		break;
+
+	case "CODE":
+		<textarea id="auto-resize-textarea" disabled title="CODE">
+			@Model.Context
+		</textarea>
+
+		<style>
+			#auto-resize-textarea {
+				width: 90%; /* Set the width as needed */
+				min-height: 50px; /* Set a minimum height */
+				overflow: hidden; /* Hide the scrollbar */
+				resize: none; /* Disable manual resizing */
+				border-radius: 10px;
+				margin: 5px;
+				margin-left: 10px;
+			}
+		</style>
+
+		<script>
+			const textarea = document.getElementById('auto-resize-textarea');
+
+			textarea.style.height = textarea.scrollHeight + 'px';
+		</script>
+		break;
+
+	case "PARAGRAPH":
+		<p style="font-style:italic;">@Model.Context</p>
+		break;
+
 	case "BULLETPOINTS":
-		<ul>
+		<ul style="list-style: circle; padding-left: 30px;">
 			@foreach (var item in Model.Context.Split('\n'))
 			{
 				<li>@item</li>
@@ -24,6 +56,6 @@
 		break;
 
 	default:
-		<p style="color: red;">Unknown type</p>
+		<p style="color: red;">Unknown type: @Model.Type</p>
 		break;
 }

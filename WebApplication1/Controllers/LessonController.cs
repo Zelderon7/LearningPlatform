@@ -113,7 +113,7 @@ namespace WebApplication1.Controllers
             _context.Lessons.Add(lesson);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index", new { lessonId = lesson.Id });
+            return RedirectToAction("Lesson", new { lessonId = lesson.Id });
         }
     }
 }
