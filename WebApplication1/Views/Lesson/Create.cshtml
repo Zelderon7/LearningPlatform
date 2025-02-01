@@ -15,8 +15,11 @@
         <!-- Contents will be dynamically added here -->
     </div>
 
-    <button type="button" id="add-content" class="btn btn-primary">Add Content</button>
-    <button type="submit" class="btn btn-success">Save Lesson</button>
+
+    <div class="admin-options">
+        <button type="button" id="add-content" class="btn btn-primary">Add Content</button>
+        <button type="submit" class="btn btn-success">Save Lesson</button>
+    </div>
 </form>
 
 <!-- Template for a new content item -->
@@ -29,18 +32,20 @@
             <option value="Title">Title</option>
             <option value="SubTitle">SubTitle</option>
             <option value="Code">Code</option>
-            <option value="image">Image</option>
+            <option value="Image">Image</option>
         </select>
-        <textarea class="form-control content-data" placeholder="Enter data..."></textarea>
-        <input type="hidden" class="content-order" value="0" />
-        <button type="button" class="btn btn-danger remove-content">Remove</button>
+        <div>
+            <textarea class="form-control content-data" placeholder="Enter data..."></textarea>
+            <input type="hidden" class="content-order" value="0" />
+            <button type="button" class="btn btn-danger remove-content">Del</button>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
-                document.addEventListener("DOMContentLoaded", function () {
+                 document.addEventListener("DOMContentLoaded", function () {
             const contentsList = document.getElementById("contents-list");
             const addContentButton = document.getElementById("add-content");
             const contentTemplate = document.getElementById("content-template").innerHTML;
@@ -67,6 +72,9 @@
                         e.preventDefault(); // Prevent form submission
                     }
                 });
+
+                // Add event listener for content type change
+                newContent.querySelector(".content-type").addEventListener("change", assignTextareaCSS);
             });
 
             // Remove content
@@ -78,19 +86,24 @@
             });
 
             // Initialize Sortable for drag-and-drop
-            new Sortable(contentsList, {
+            const sortable = new Sortable(contentsList, {
                 animation: 150,
-                onEnd: function () {
+                onEnd: function (evt) {
+                    console.log("Drag-and-drop ended. Updating OrderIndexes...");
                     updateOrderIndexes();
                 }
             });
 
             // Update OrderIndex values after reordering or removing items
             function updateOrderIndexes() {
+                console.log("Updating OrderIndexes...");
                 const items = contentsList.querySelectorAll(".content-item");
+                console.log(`Found ${items.length} items.`);
+
                 items.forEach((item, index) => {
-                    item.querySelector(".content-order").value = index;
-                    item.querySelector(".content-order").name = `contents[${index}].OrderIndex`;
+                    const orderInput = item.querySelector(".content-order");
+                    orderInput.value = index;
+                    console.log(`Updated OrderIndex for item ${index}:`, orderInput.value);
                 });
             }
 
@@ -103,6 +116,36 @@
                     }
                 });
             });
+
+            // Assign CSS classes to textarea based on content type
+            function assignTextareaCSS() {
+                let textarea = this.closest(".content-item").querySelector("textarea");
+
+                // Remove all possible content classes
+                textarea.classList.remove("title-content", "text-content", "image-content", "bullet-content", "paragraph-content");
+
+                switch (this.value) {
+                    case "Title":
+                        textarea.classList.add("title-content");
+                        break;
+
+                    case "Text":
+                        textarea.classList.add("text-content");
+                        break;
+
+                    case "Image":
+                        textarea.classList.add("image-content");
+                        break;
+
+                    case "Bullet Points":
+                        textarea.classList.add("bullet-content");
+                        break;
+
+                    case "Paragraph":
+                        textarea.classList.add("paragraph-content");
+                        break;
+                }
+            }
         });
     </script>
 }

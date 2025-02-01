@@ -631,3 +631,31 @@ div.checkbox {
 .create-form-container label{
     margin: 0;
 }
+
+.content-item > div:has(> button.btn-danger) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.content-item > div > button.btn-danger {
+    width: auto;
+    height: 100%;
+}
+
+
+/* Visualization based on the type */
+
+.content-item > div > textarea.title-content {
+    font-size: xx-large;
+    font-family: ui-monospace;
+}
+
+.content-item > div > textarea.paragraph-content {
+    font-style: italic;
+}
+
+.content-item > div > textarea.image-content {
+    font: italic;
+    text-decoration: underline;
+}

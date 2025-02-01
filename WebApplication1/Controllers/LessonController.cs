@@ -61,7 +61,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(LessonVM lessonVM, List<LessonContentVM> contents)
+        public async Task<IActionResult> Create(LessonVM lessonVM)
         {
             if (!ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace WebApplication1.Controllers
                 Title = lessonVM.Title,
                 ClassSectionId = lessonVM.ClassSectionId,
                 OrderIndex = 0, // Set this as needed
-                Contents = contents
+                Contents = lessonVM.Contents
                     .Select(c => c.ToLessonContent())
                     .ToList()
             };
