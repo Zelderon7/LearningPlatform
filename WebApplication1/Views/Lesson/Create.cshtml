@@ -1,0 +1,151 @@
+﻿@model WebApplication1.Models.VMs.LessonVM
+
+<h2>Create Lesson</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="form-control" />
+    </div>
+
+    <input asp-for="ClassSectionId" type="hidden" />
+
+    <h3>Contents</h3>
+    <div id="contents-list">
+        <!-- Contents will be dynamically added here -->
+    </div>
+
+
+    <div class="admin-options">
+        <button type="button" id="add-content" class="btn btn-primary">Add Content</button>
+        <button type="submit" class="btn btn-success">Save Lesson</button>
+    </div>
+</form>
+
+<!-- Template for a new content item -->
+<div id="content-template" style="display: none;">
+    <div class="content-item">
+        <select class="form-control content-type">
+            <option value="Text">Text</option>
+            <option value="Paragraph">Paragraph</option>
+            <option value="Bulletpoints">Bullet Points</option>
+            <option value="Title">Title</option>
+            <option value="SubTitle">SubTitle</option>
+            <option value="Code">Code</option>
+            <option value="Image">Image</option>
+        </select>
+        <div>
+            <textarea class="form-control content-data" placeholder="Enter data..."></textarea>
+            <input type="hidden" class="content-order" value="0" />
+            <button type="button" class="btn btn-danger remove-content">Del</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script>
+                 document.addEventListener("DOMContentLoaded", function () {
+            const contentsList = document.getElementById("contents-list");
+            const addContentButton = document.getElementById("add-content");
+            const contentTemplate = document.getElementById("content-template").innerHTML;
+
+            let contentIndex = 0;
+
+            // Add new content
+            addContentButton.addEventListener("click", function () {
+                const newContent = document.createElement("div");
+                newContent.innerHTML = contentTemplate;
+
+                // Update the names of the input fields to match the model binding format
+                newContent.querySelector(".content-type").name = `contents[${contentIndex}].Type`;
+                newContent.querySelector(".content-data").name = `contents[${contentIndex}].Context`;
+                newContent.querySelector(".content-order").name = `contents[${contentIndex}].OrderIndex`;
+
+                newContent.querySelector(".content-order").value = contentIndex++;
+                contentsList.appendChild(newContent);
+
+                // Add event listener to prevent form submission on Enter key press
+                const contentDataInput = newContent.querySelector(".content-data");
+                contentDataInput.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault(); // Prevent form submission
+                    }
+                });
+
+                // Add event listener for content type change
+                newContent.querySelector(".content-type").addEventListener("change", assignTextareaCSS);
+            });
+
+            // Remove content
+            contentsList.addEventListener("click", function (e) {
+                if (e.target.classList.contains("remove-content")) {
+                    e.target.closest(".content-item").remove();
+                    updateOrderIndexes();
+                }
+            });
+
+            // Initialize Sortable for drag-and-drop
+            const sortable = new Sortable(contentsList, {
+                animation: 150,
+                onEnd: function (evt) {
+                    console.log("Drag-and-drop ended. Updating OrderIndexes...");
+                    updateOrderIndexes();
+                }
+            });
+
+            // Update OrderIndex values after reordering or removing items
+            function updateOrderIndexes() {
+                console.log("Updating OrderIndexes...");
+                const items = contentsList.querySelectorAll(".content-item");
+                console.log(`Found ${items.length} items.`);
+
+                items.forEach((item, index) => {
+                    const orderInput = item.querySelector(".content-order");
+                    orderInput.value = index;
+                    console.log(`Updated OrderIndex for item ${index}:`, orderInput.value);
+                });
+            }
+
+            // Prevent form submission on Enter key press for existing content inputs
+            const existingContentInputs = document.querySelectorAll(".content-data");
+            existingContentInputs.forEach(input => {
+                input.addEventListener("keydown", function (e) {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault(); // Prevent form submission
+                    }
+                });
+            });
+
+            // Assign CSS classes to textarea based on content type
+            function assignTextareaCSS() {
+                let textarea = this.closest(".content-item").querySelector("textarea");
+
+                // Remove all possible content classes
+                textarea.classList.remove("title-content", "text-content", "image-content", "bullet-content", "paragraph-content");
+
+                switch (this.value) {
+                    case "Title":
+                        textarea.classList.add("title-content");
+                        break;
+
+                    case "Text":
+                        textarea.classList.add("text-content");
+                        break;
+
+                    case "Image":
+                        textarea.classList.add("image-content");
+                        break;
+
+                    case "Bullet Points":
+                        textarea.classList.add("bullet-content");
+                        break;
+
+                    case "Paragraph":
+                        textarea.classList.add("paragraph-content");
+                        break;
+                }
+            }
+        });
+    </script>
+}

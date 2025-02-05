@@ -8,6 +8,8 @@ namespace WebApplication1.Models.Entities
         [Key]
         public int Id { get; set; }
 
+        public string? PictureUrl { get; set; }
+
         [Required, MaxLength(100)]
         public string Title { get; set; }
 

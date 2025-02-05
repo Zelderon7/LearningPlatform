@@ -1,0 +1,40 @@
+﻿@model WebApplication1.Models.Entities.ClassSection;
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<!-- Header -->
+<div class="institution-header">
+    <img src="@(Model.PictureUrl ?? "https://placehold.co/280x180")" style="height: 100%;" />
+    <h2>@Model.Title</h2>
+</div>
+<div style="height: 30px;"></div>
+
+@if(User.IsInRole("ADMIN")){
+	<div class="admin-options">
+		<a class="btn btn-success" asp-controller="Lesson" asp-action="Create" asp-route-classSectionId="@Model.Id">New Lesson</a>
+	</div>	
+}
+
+<div class="lessons-container">
+    <h5>Lessons</h5>
+    <div>
+		@if(Model.Lessons.Count > 0){
+			<ul>
+				@foreach (var item in Model.Lessons.OrderBy(l => l.OrderIndex))
+				{
+					<li>
+						<a href="@Url.Action("GetLesson", "Lesson", new { id = item.Id })">@item.Title</a>
+					</li>
+				}
+			</ul>
+		}
+		else{
+			<p>There are no lessons yet :(</p>
+		}
+		
+    </div>
+</div>

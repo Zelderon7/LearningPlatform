@@ -11,7 +11,7 @@ namespace WebApplication1.Models.Entities
         Title,
         SubTitle,
         Code,
-        image
+        Image
     }
     public class LessonContent
     {
