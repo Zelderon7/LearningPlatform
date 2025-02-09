@@ -1,7 +1,8 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model WebApplication1.Models.VMs.CodingIDEVM
+
 @{
+	Layout = null;
+    ViewData["Title"] = Model.Task.Name;
 }
 
 <!DOCTYPE html>
@@ -9,64 +10,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codewars Clone</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>@Model.Task.Name</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/editor.main.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .left-panel {
+            flex: 1;
+            max-width: 30%;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
         }
 
         .editor-container {
-            height: 500px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .btn-group-custom {
-            margin-top: 10px;
-        }
-
-        .task {
+            flex: 1;
+            border: 1px solid #444;
             margin-bottom: 20px;
+        }
+
+        .file-tabs {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .file-tab {
+            padding: 10px;
+            background-color: #2d2d2d;
+            color: #d4d4d4;
+            cursor: pointer;
+            margin-right: 5px;
+            border: 1px solid #444;
+        }
+
+            .file-tab.active {
+                background-color: #1e1e1e;
+                border-bottom: 1px solid #1e1e1e;
+            }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+            .button-container button {
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+
+                .button-container button:hover {
+                    background-color: #0056b3;
+                }
+
+        .output-container {
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            padding: 10px;
+            color: #d4d4d4;
+            margin-top: 20px;
+            height: 100px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">Codewars Clone</h1>
-
-        <!-- Task Description -->
-        <div class="task p-3 bg-white shadow-sm rounded">
-            <h4>Task</h4>
-            <p>
-                Write a function that takes an integer and returns its factorial.
-                Make sure the function handles edge cases like `0` correctly!
-            </p>
+    <div class="container">
+        <!-- Left Panel: Title and Description -->
+        <div class="left-panel">
+            <h1>@Model.Task.Name</h1>
+            <p>@Model.Task.Description</p>
         </div>
 
-        <!-- Monaco Editor -->
-        <div class="editor-container bg-white shadow-sm" id="editor"></div>
+        <!-- Right Panel: Editor and Buttons -->
+        <div class="right-panel">
+            <!-- File Tabs -->
+            <div class="file-tabs" id="fileTabs">
+                @for (int i = 0; i < Model.FilePaths.Length; i++)
+                {
+                    <div class="file-tab @(i == 0 ? "active" : "")" data-index="@i">@Model.FilePaths[i]</div>
+                }
+            </div>
 
-        <!-- Buttons -->
-        <div class="btn-group btn-group-custom d-flex justify-content-end">
-            <button class="btn btn-secondary">Reset</button>
-            <button class="btn btn-primary">Submit Code</button>
+            <!-- Monaco Editor -->
+            <div class="editor-container" id="editorContainer"></div>
+
+            <!-- Buttons -->
+            <div class="button-container">
+                <form asp-action="RunCode" method="post">
+                    <!-- Hidden fields for CodingTask properties -->
+                    <input type="hidden" asp-for="Task.Id" />
+                    <input type="hidden" asp-for="Task.Name" />
+                    <input type="hidden" asp-for="Task.Description" />
+                    <input type="hidden" asp-for="Task.AuthorId" />
+                    <input type="hidden" asp-for="Task.Language" />
+
+                    <!-- Hidden field for Folder Directory -->
+                    <input type="hidden" asp-for="FolderDir" />
+
+                    <!-- Handling FilePaths (if needed) -->
+                    @if (Model.FilePaths != null)
+                    {
+                        @for (int i = 0; i < Model.FilePaths.Length; i++)
+                        {
+                            <input type="hidden" asp-for="FilePaths[i]" />
+                        }
+                    }
+
+                    <button type="submit" id="submitButton">Submit Code</button>
+                </form>
+                <button id="resetButton">Reset Code</button>
+            </div>
+
+            <!-- Output Area -->
+            <div class="output-container" id="outputContainer">
+                <p>@Model.Output</p>
+                <p style="text: red;">@Model.Error</p>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs/loader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
     <script>
-        // Monaco Editor Setup
-        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.38.0/min/vs' } });
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' }});
         require(['vs/editor/editor.main'], function () {
-            monaco.editor.create(document.getElementById('editor'), {
-                value: `function factorial(n) {\n    if (n === 0) return 1;\n    return n * factorial(n - 1);\n}`,
-                language: 'javascript',
-                theme: 'vs-light',
-                automaticLayout: true
+            const fileContents = @Html.Raw(Json.Serialize(Model.FilePaths.Select(fp => File.ReadAllText(fp)).ToArray()));
+            const editors = [];
+            const editorContainer = document.getElementById('editorContainer');
+            const outputContainer = document.getElementById('outputContainer');
+            const submitButton = document.getElementById('submitButton');
+            const resetButton = document.getElementById('resetButton');
+
+            function createEditor(index) {
+                const editor = monaco.editor.create(editorContainer, {
+                    value: fileContents[index],
+                    language: 'python',
+                    theme: 'vs-dark'
+                });
+                editors[index] = editor;
+            }
+
+            function showEditor(index) {
+                editors.forEach((editor, i) => {
+                    if (i === index) {
+                        editorContainer.innerHTML = '';
+                        editor.layout();
+                        editorContainer.appendChild(editor.getDomNode());
+                    }
+                });
+            }
+
+            document.querySelectorAll('.file-tab').forEach((tab, index) => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.file-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    if (!editors[index]) {
+                        createEditor(index);
+                    }
+                    showEditor(index);
+                });
+            });
+
+            // Initialize the first editor
+            createEditor(0);
+
+            // Submit Button Click Handler
+            submitButton.addEventListener('click', () => {
+                const activeTab = document.querySelector('.file-tab.active');
+                const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
+                const code = editors[activeIndex].getValue();
+
+                // Simulate output (replace with actual API call or logic)
+                outputContainer.innerHTML = `<p>Submitted code for ${Model.FilePaths[activeIndex]}:</p><pre>${code}</pre>`;
+            });
+
+            // Reset Button Click Handler
+            resetButton.addEventListener('click', () => {
+                const activeTab = document.querySelector('.file-tab.active');
+                const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
+                editors[activeIndex].setValue(fileContents[activeIndex]);
+                outputContainer.innerHTML = `<p>Code reset to initial state.</p>`;
             });
         });
     </script>

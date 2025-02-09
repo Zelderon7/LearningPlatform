@@ -15,6 +15,9 @@ namespace WebApplication1.Services
 
         public async Task<(string output, string error)> RunFolderAsync(CodingTask task, string folderPath)
         {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
             if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath))
             {
                 throw new ArgumentException("Invalid folder path.", nameof(folderPath));
