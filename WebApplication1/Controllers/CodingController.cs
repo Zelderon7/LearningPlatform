@@ -5,6 +5,7 @@ using WebApplication1.Models.VMs;
 using System;
 using System.IO;
 using WebApplication1.Services;
+using WebApplication1.Models.DTOs;
 
 namespace WebApplication1.Controllers
 {
@@ -45,6 +46,25 @@ namespace WebApplication1.Controllers
             };
 
             return View("IDE", model);
+        }
+
+        [HttpPost]
+        public IActionResult SaveCode([FromBody] SaveCodeRequest request)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(request.FilePath) && !string.IsNullOrEmpty(request.Content))
+                {
+                    System.IO.File.WriteAllText(request.FilePath, request.Content);
+                    return Json(new { success = true });
+                }
+
+                return Json(new { success = false, message = "Invalid file path or content." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]

@@ -149,17 +149,18 @@
             <!-- Output Area -->
             <div class="output-container" id="outputContainer">
                 <p>@Model.Output</p>
-                <p style="text: red;">@Model.Error</p>
+                <p style="color: red;">@Model.Error</p>
             </div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
     <script>
+        const editors = [];
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' }});
         require(['vs/editor/editor.main'], function () {
             const fileContents = @Html.Raw(Json.Serialize(Model.FilePaths.Select(fp => File.ReadAllText(fp)).ToArray()));
-            const editors = [];
+            
             const editorContainer = document.getElementById('editorContainer');
             const outputContainer = document.getElementById('outputContainer');
             const submitButton = document.getElementById('submitButton');
@@ -216,6 +217,44 @@
                 outputContainer.innerHTML = `<p>Code reset to initial state.</p>`;
             });
         });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.ctrlKey && event.key === 's') {
+                event.preventDefault(); // Prevent default browser save
+
+                const activeTab = document.querySelector('.file-tab.active');
+                const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
+                const code = editors[activeIndex].getValue();
+                const filePaths = @Html.Raw(Json.Serialize(Model.FilePaths)); // Correct way
+                const filePath = filePaths[activeIndex]; // Now correctly fetches the file path
+
+                // Send AJAX request to save the file
+                fetch('/Coding/SaveCode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify({ filePath: filePath, content: code })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('File saved successfully!');
+                        outputContainer.innerHTML = `<p style="color: green;">File saved successfully!</p>`;
+                    } else {
+                        console.error('Error saving file:', data.message);
+                        outputContainer.innerHTML = `<p style="color: red;">Error saving file: ${data.message}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Request failed:', error);
+                    outputContainer.innerHTML = `<p style="color: red;">Failed to save file.</p>`;
+                });
+            }
+        });
+
+
     </script>
 </body>
 </html>
