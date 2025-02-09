@@ -20,16 +20,21 @@ namespace WebApplication1.Services
                 throw new ArgumentException("Invalid folder path.", nameof(folderPath));
             }
 
-            string containerName = $"task-[{task.Id}]";
+
             string imageName = GetImageFromLanguage(task.Language);
-            string containerCommand = GetStartFileFromLanguage(task.Language);
-            string limitations = "--memory=512m --cpus=1";
+            string starterFile = GetStartFileFromLanguage(task.Language);
+
+            if (!Directory.EnumerateFiles(folderPath).Any(file => file.EndsWith(starterFile)))
+            {
+                throw new FileNotFoundException("No starter file found");
+            }
+
 
             // Create the podman container and map the folder
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = _podmanExecutable,
-                Arguments = $"run --rm {limitations} -v {folderPath}:/app -w /app {containerName} {imageName} {containerCommand}",
+                Arguments = $"run --rm -v {folderPath}:/app -w /app {imageName} {starterFile}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
@@ -78,7 +83,7 @@ namespace WebApplication1.Services
             switch (language.ToLower())
             {
                 case "python":
-                    return "python:3.11";
+                    return "python:3.11 python";
 
                 default:
                     throw new NotSupportedException($"{language} is not supported yet");
