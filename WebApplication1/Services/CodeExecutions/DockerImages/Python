@@ -1,0 +1,4 @@
+﻿FROM python:3.11
+RUN pip install numpy pandas flask
+WORKDIR /app
+CMD ["python", "/app/script.py"]
