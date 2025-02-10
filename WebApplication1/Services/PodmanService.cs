@@ -83,7 +83,7 @@ namespace WebApplication1.Services
             switch (language.ToLower())
             {
                 case "python":
-                    return "python:3.11 python";
+                    return "python-image python";
 
                 default:
                     throw new NotSupportedException($"{language} is not supported yet");

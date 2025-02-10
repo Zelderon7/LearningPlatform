@@ -193,6 +193,40 @@ namespace WebApplication1.Migrations
                     b.ToTable("ClassSections");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.ToTable("CodingTasks");
+                });
+
             modelBuilder.Entity("WebApplication1.Models.Entities.Institution", b =>
                 {
                     b.Property<int>("InstitutionId")
@@ -566,6 +600,17 @@ namespace WebApplication1.Migrations
                         .IsRequired();
 
                     b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingTask", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinClassRequest", b =>
