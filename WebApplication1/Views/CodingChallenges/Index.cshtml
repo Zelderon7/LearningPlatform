@@ -1,0 +1,39 @@
+﻿@model IEnumerable<WebApplication1.Models.Entities.CodingTask>
+
+@{
+    ViewData["Title"] = "Discover";
+}
+
+
+@if(Model.Count() == 0){
+    <h2>No challenges yet :(</h2>
+}
+
+<div class="container-fluid" style="display: flex !important; gap: 20px; margin-top: 30px; margin-left: 20px;">
+
+    @foreach (var item in Model)
+    {
+        <div class="card" style="width: 18rem;">
+            @if (item.ImageUrl != null)
+            {
+                <img class="card-img-top" src="@item.ImageUrl" alt="Card image cap">
+            }
+            else
+            {
+                <img class="card-img-top" src="https://placehold.co/286x180" alt="Card image cap">
+            }
+            <div class="card-body" style="padding-bottom: 10px;">
+                <h5 class="card-title mb-3">@item.Name</h5>
+                <p class="card-text mb-0">@(item.Description.Length < 20? item.Description : item.Description.Substring(0, 20) + "...")</p>
+                <div style="display: flex; justify-content:space-between; align-items: center;">
+                    <p class="card-text" style="color: deepskyblue">@item.Language</p>
+                    <form asp-action="OpenChallenge" method="post" style="margin: 0;">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-primary">Solve</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
