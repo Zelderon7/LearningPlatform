@@ -181,6 +181,9 @@ namespace WebApplication1.Migrations
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
+                    b.Property<string>("PictureUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)

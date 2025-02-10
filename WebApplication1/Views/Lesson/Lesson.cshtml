@@ -1,0 +1,17 @@
+﻿@using WebApplication1.Models.VMs;
+@model WebApplication1.Models.Entities.Lesson;
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<h1>@Model.Title</h1>
+
+@foreach (var item in Model.Contents.OrderBy(l => l.OrderIndex))
+{
+	<div class="lesson-content-view">
+		<partial name="../Lesson/Partials/_LessonContentPartial" model="@new LessonContentVM(item)" />
+	</div>
+}

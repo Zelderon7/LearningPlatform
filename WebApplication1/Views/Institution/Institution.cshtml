@@ -1,58 +1,63 @@
 ﻿@model WebApplication1.Models.DTOs.FullInstitutionDTO
 
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
 @{
+    ViewData["Title"] = "Institution";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<!-- Link to site.css -->
+<link rel="stylesheet" href="~/css/site.css" />
 
 <!-- Header -->
 <div class="institution-header">
-    <img src="@(Model.ImageUrl ?? "https://placehold.co/280x180")" style="height: 100%;" />
+    <img src="@(Model.ImageUrl ?? "https://placehold.co/280x180")" class="institution-image" />
     <h2>@Model.Name</h2>
 </div>
-<div style="height: 7rem;"></div>
+<div class="spacer"></div>
 
 <!-- Admin options -->
 @if(User.IsInRole("ADMIN")){
-    <div style="display: flex; flex-direction: row; justify-content: end; gap: 5px !important;">
-        <a class="btn btn-success mt-2" asp-controller="Class" asp-action="Create" asp-route-instId="@Model.Id">Create Class</a>
-        <a class="btn btn-primary mt-2" asp-controller="Institution" asp-action="GetRequests" asp-route-instId="@Model.Id">Manage Requests</a>
-        <a class="btn btn-primary mt-2" asp-controller="Institution" asp-action="GetParticipants" asp-route-instId="@Model.Id">Participants</a>
+    <div class="admin-options">
+        <a class="btn btn-success" asp-controller="Class" asp-action="Create" asp-route-instId="@Model.Id">Create Class</a>
+        <a class="btn btn-primary" asp-controller="Institution" asp-action="GetRequests" asp-route-instId="@Model.Id">Manage Requests</a>
+        <a class="btn btn-primary" asp-controller="Institution" asp-action="GetParticipants" asp-route-instId="@Model.Id">Participants</a>
     </div>
 }
 
-
 <!-- Classes -->
-<div class="container-fluid flex-row flex-wrap w-100 mt-3" style="display: flex !important; gap: 20px;">
-
-    @foreach (var item in Model.Classes)
-    {
-        <form asp-controller="Class" asp-action="GetClass" asp-route-id="@item.ClassId" method="get">
-            <div class="card" style="width: 280px !important; min-width: 280px;">
-                @if (item.ImageUrl != null)
-                {
-                    <img class="card-img-top" src="@item.ImageUrl" alt="Card image cap">
-                }
-                else
-                {
-                    <img class="card-img-top" src="https://placehold.co/280x180" alt="Card image cap">
-                }
-                <div class="card-body">
-                    <h5 class="card-title mb-3" style="font-weight: bold !important;">@item.Name</h5>
-                    <p class="card-text">@item.Description</p>
-                </div>
-
-                <button type="submit" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; border: none; padding: 0; margin: 0;"></button>
-                @if (User.IsInRole("ADMIN"))
-                {
-                    <div style="display: flex; justify-content: end; z-index: 1000">
-                        <a asp-controller="Class" asp-action="Remove" asp-route-id="@item.ClassId" class="btn btn-danger">Delete</a>
+@if (Model.Classes == null || !Model.Classes.Any())
+{
+    <h3 class="no-classes">No classes available...</h3>
+}
+else
+{
+    <div class="classes-container">
+        @foreach (var item in Model.Classes)
+        {
+            <form asp-controller="Class" asp-action="GetClass" asp-route-id="@item.ClassId" method="get">
+                <div class="card">
+                    @if (item.ImageUrl != null)
+                    {
+                        <img class="card-img" src="@item.ImageUrl" alt="Card image cap">
+                    }
+                    else
+                    {
+                        <img class="card-img" src="https://placehold.co/280x180" alt="Card image cap">
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <p class="card-text">@item.Description</p>
                     </div>
-                }
-            </div>
-        </form>
-    }
 
-</div>
+                    <button type="submit" class="card-link"></button>
+                    @if (User.IsInRole("ADMIN"))
+                    {
+                        <div class="card-admin-options">
+                            <a asp-controller="Class" asp-action="Remove" asp-route-id="@item.ClassId" class="btn btn-danger">Delete</a>
+                        </div>
+                    }
+                </div>
+            </form>
+        }
+    </div>
+}

@@ -155,5 +155,43 @@ namespace WebApplication1.Controllers
 
             return Redirect(Request.Headers["Referer"].ToString());
         }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet]
+        public IActionResult CreateSection(int classId)
+        {
+            ViewData["classId"] = classId;
+            return View();
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        public async Task<IActionResult> CreateSection(ClassSection section)
+        {
+            try
+            {
+                _context.ClassSections.Add(section);
+                _context.SaveChanges();
+
+                return RedirectToAction("GetClass", new {id = section.ClassId});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSection(int id)
+        {
+            ClassSection? section = _context.ClassSections
+                .Include(x => x.Lessons)
+                .FirstOrDefault(s => s.Id == id);
+
+            if (section == null)
+                return NotFound();
+
+            return View("ClassSection", section);
+        }
     }
 }

@@ -7,13 +7,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <link rel="stylesheet" href="~/css/site.css" />
-    
-</head>
-<body>
 
 	@if (ViewData["Error"] != null)
 	{
@@ -38,11 +31,11 @@
     else
     {
         <!-- Joined classes carousel -->
-        <div class="flex flex-row overflow-x-scroll gap-2 mt-3 mx-auto container-fluid pb-2" style="display: flex !important; width: fit-content">
+        <div class="joined-classes-container">
             @foreach (var item in Model)
             {
                 <form asp-action="GetInstitution" method="get">
-                    <div class="card" style="width: fit-content">
+                    <div class="card" style="margin-bottom: 5px;">
                         @if (item.ImageUrl != null)
                         {
                             <img class="card-img-top" style="width: 280px !important; height: 180px !important;" src="@item.ImageUrl" alt="Card image cap">
@@ -72,26 +65,14 @@
     
     <div style="display: flex; gap: 5px;">
 
-        <a class="btn btn-primary mt-2" asp-action="Discover">Discover</a>
+        <a class="btn btn-primary" style="margin-left: 10px;" asp-action="Discover">Discover</a>
 
 	    @if (User.IsInRole("ADMIN"))
 	    {
-            <a class="btn btn-success mt-2" asp-action="Create">Create</a>
-            <a class="btn btn-primary mt-2" style="margin-left: auto;" asp-action="GetRequests">Manage Requests</a>
+            <a class="btn btn-success" asp-action="Create">Create</a>
+            <a class="btn btn-primary" style="margin-left: auto; margin-right: 10px;" asp-action="GetRequests">Manage Requests</a>
 	    }
+
+        
         
     </div>
-
-
-    <!-- Join with code form} -->
-    <div class="card p-3 mt-2" style="width: fit-content;">
-        <form asp-action="Join" method="post">
-            <div class="form-floating mb-3">
-                <input id="code" name="code" type="text" maxlength="6" class="form-control" required placeholder="00000000" />
-                <label for="code" class="form-label">Code</label>
-            </div>
-            <button type="submit" class="btn btn-primary">Join</button>
-        </form>
-    </div>
-</body>
-</html>

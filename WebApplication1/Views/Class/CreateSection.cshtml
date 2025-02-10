@@ -1,0 +1,46 @@
+﻿@model WebApplication1.Models.Entities.ClassSection
+
+@{
+    ViewData["Title"] = "CreateSection";
+}
+
+<div class="create-form-container">
+
+    <h1>CreateSection</h1>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="CreateSection" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="PictureUrl" class="control-label"></label>
+                    <input asp-for="PictureUrl" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="OrderIndex" class="control-label"></label>
+                    <input asp-for="OrderIndex" class="form-control" />
+                    <span asp-validation-for="OrderIndex" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="hidden" asp-for="ClassId" value="@ViewData["classId"]" />
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+
+            <a class="link-danger" asp-action="GetClass" asp-route-id="@ViewData["classId"]">Return</a>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
