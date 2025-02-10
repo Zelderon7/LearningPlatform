@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using WebApplication1.Services;
 using WebApplication1.Models.DTOs;
+using Newtonsoft.Json;
 
 namespace WebApplication1.Controllers
 {
@@ -18,7 +19,19 @@ namespace WebApplication1.Controllers
             _podmanService = podmanService;
         }
 
+        [HttpGet]
         public IActionResult Index()
+        {
+            if (TempData["CodingIDEVMModel"] != null)
+            {
+                var model = JsonConvert.DeserializeObject<CodingIDEVM>((string)TempData["CodingIDEVMModel"]);
+                return View("IDE", model);
+            }
+            return NotFound();
+        }
+
+        [HttpGet]
+        public IActionResult Test()
         {
             CodingTask codingTask = new CodingTask()
             {
@@ -75,7 +88,12 @@ namespace WebApplication1.Controllers
             data.Output = result.output;
             data.Error = result.error;
 
-            return View("IDE", data);
+
+            // Storing the complex model in TempData
+            TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(data);
+
+            return RedirectToAction("Index");
         }
+
     }
 }

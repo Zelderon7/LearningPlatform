@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.VMs;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
@@ -12,10 +14,12 @@ namespace WebApplication1.Controllers
     {
         ApplicationDbContext _context;
         UserManager<User> _userManager;
-        public CodingChallengesController(ApplicationDbContext context, UserManager<User> userManager)
+        DirectoryService _directoryService;
+        public CodingChallengesController(ApplicationDbContext context, UserManager<User> userManager, DirectoryService directoryService)
         {
             _context = context;
             _userManager = userManager;
+            _directoryService = directoryService;
         }
 
         public async Task<IActionResult> Index()
@@ -24,10 +28,33 @@ namespace WebApplication1.Controllers
             return View(model);
         }
 
+        [HttpGet]
         public async Task<IActionResult> OpenChallenge(int id)
         {
-            throw new NotImplementedException();
+            CodingTask? task = await _context.CodingTasks.SingleOrDefaultAsync(c => c.Id == id);
+            if(task == null)
+                return NotFound();
+
+            string folderDir = Path.Combine(AppConstants.CodingTasksDir, task.Id.ToString());
+            if (!Directory.Exists(folderDir))
+                return NotFound("Task directory does not exists");
+
+            string[] files = Directory.GetFiles(folderDir);
+
+            if(files.Length == 0)
+                return NotFound("Task directory is empty");
+
+            CodingIDEVM model = new CodingIDEVM
+            {
+                Task = task,
+                FolderDir = folderDir,
+                FilePaths = files
+            };
+
+            return RedirectToAction("Index", "Coding", model);
         }
+
+
         [HttpGet]
         public IActionResult Create()
         {
@@ -48,6 +75,20 @@ namespace WebApplication1.Controllers
 
             _context.Add(data);
             _context.SaveChanges();
+
+            string folderDir = Path.Combine(AppConstants.CodingTasksDir, data.Id.ToString());
+            try
+            {
+                await _directoryService.InitializeTaskFolder(folderDir, data.Language);
+            }
+            catch (Exception ex)
+            {
+                int id = data.Id;
+                _context.Remove(data);
+                _context.SaveChanges(true);
+                throw new Exception($"Directory for id: {id} already exists! -> task deleted");
+            }
+            
 
             return RedirectToAction("OpenChallenge", data.Id);
         }
