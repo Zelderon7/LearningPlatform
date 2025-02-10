@@ -5,6 +5,7 @@ using System.Security.Claims;
 using WebApplication1.Areas.Identity;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
+using WebApplication1.Services;
 
 namespace WebApplication1
 {
@@ -35,7 +36,7 @@ namespace WebApplication1
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            
+            builder.Services.AddScoped<PodmanService>();
 
             
 
