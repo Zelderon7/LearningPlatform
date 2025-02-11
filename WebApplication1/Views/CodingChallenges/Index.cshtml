@@ -27,7 +27,7 @@
                 <p class="card-text mb-0">@(item.Description.Length < 20? item.Description : item.Description.Substring(0, 20) + "...")</p>
                 <div style="display: flex; justify-content:space-between; align-items: center;">
                     <p class="card-text" style="color: deepskyblue">@item.Language</p>
-                    <form asp-action="OpenChallenge" method="post" style="margin: 0;">
+                    <form asp-action="OpenChallenge" method="get" style="margin: 0;">
                         <input type="hidden" name="id" value="@item.Id" />
                         <button type="submit" class="btn btn-primary">Solve</button>
                     </form>

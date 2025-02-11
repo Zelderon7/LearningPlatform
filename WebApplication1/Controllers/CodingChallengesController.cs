@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
 using WebApplication1.Models.VMs;
@@ -51,7 +52,9 @@ namespace WebApplication1.Controllers
                 FilePaths = files
             };
 
-            return RedirectToAction("Index", "Coding", model);
+            TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(model);
+
+            return RedirectToAction("Index", "Coding");
         }
 
 

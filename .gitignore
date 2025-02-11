@@ -362,4 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-D:\gluposti\School\FinalYearProject\LearningPlatform\WebApplication1\WebApplication1\Services\CodeExecutions\Tasks\
+WebApplication1/Services/CodeExecutions/Tasks/
+WebApplication1/Services/CodeExecutions/UserTasks/
