@@ -63,12 +63,19 @@ namespace WebApplication1.Controllers
             {
                 new SelectListItem { Value = "python", Text = "Python" }
             };
+
+            ViewBag.Templates = Directory
+                .EnumerateDirectories(AppConstants.LanguageTemplatesDir)
+                .Skip(1)
+                .Select(d => new SelectListItem(Path.GetFileName(d), Path.GetFileName(d)))
+                .ToList();
+
             return View(model);
         }
 
         [Authorize(Roles = "TEACHER,ADMIN")]
         [HttpPost]
-        public async Task<IActionResult> Create(CodingTask data)
+        public async Task<IActionResult> Create(CodingTask data, string template)
         {
             User user = await _userManager.GetUserAsync(User);
             data.AuthorId = user.Id;
@@ -79,14 +86,14 @@ namespace WebApplication1.Controllers
             string folderDir = Path.Combine(AppConstants.CodingTasksDir, data.Id.ToString());
             try
             {
-                await _directoryService.InitializeTaskFolder(folderDir, data.Language);
+                await _directoryService.InitializeTaskFolder(folderDir, data.Language, template);
             }
             catch (Exception ex)
             {
                 int id = data.Id;
                 _context.Remove(data);
                 _context.SaveChanges(true);
-                throw new Exception($"Directory for id: {id} already exists! -> task deleted");
+                throw ex;
             }
             
 

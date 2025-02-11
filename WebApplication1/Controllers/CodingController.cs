@@ -7,16 +7,20 @@ using System.IO;
 using WebApplication1.Services;
 using WebApplication1.Models.DTOs;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApplication1.Controllers
 {
+    [Authorize]
     public class CodingController : Controller
     {
         PodmanService _podmanService;
-
-        public CodingController(PodmanService podmanService)
+        UserManager<User> _userManager;
+        public CodingController(PodmanService podmanService, UserManager<User> userManager)
         {
             _podmanService = podmanService;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -93,6 +97,12 @@ namespace WebApplication1.Controllers
             TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(data);
 
             return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> ResetCode(int taskId)
+        {
+            throw new NotImplementedException();
+            User user = await _userManager.GetUserAsync(User);
         }
 
     }

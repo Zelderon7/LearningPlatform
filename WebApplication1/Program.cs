@@ -37,6 +37,7 @@ namespace WebApplication1
                 .AddDefaultTokenProviders();
 
             builder.Services.AddScoped<PodmanService>();
+            builder.Services.AddScoped<DirectoryService>();
 
             
 

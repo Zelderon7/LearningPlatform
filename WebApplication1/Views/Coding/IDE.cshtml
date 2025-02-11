@@ -1,8 +1,9 @@
 ﻿@model WebApplication1.Models.VMs.CodingIDEVM
 
 @{
-	Layout = null;
+    Layout = null;
     ViewData["Title"] = Model.Task.Name;
+    string[] files = Model.FilePaths.Select(x => System.IO.Path.GetFileName(x)).ToArray();
 }
 
 <!DOCTYPE html>
@@ -110,9 +111,9 @@
         <div class="right-panel">
             <!-- File Tabs -->
             <div class="file-tabs" id="fileTabs">
-                @for (int i = 0; i < Model.FilePaths.Length; i++)
+                @for (int i = 0; i < files.Length; i++)
                 {
-                    <div class="file-tab @(i == 0 ? "active" : "")" data-index="@i">@Model.FilePaths[i]</div>
+                    <div class="file-tab @(i == 0 ? "active" : "")" data-index="@i">@files[i]</div>
                 }
             </div>
 

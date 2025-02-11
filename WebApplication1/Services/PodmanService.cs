@@ -23,11 +23,14 @@ namespace WebApplication1.Services
                 throw new ArgumentException("Invalid folder path.", nameof(folderPath));
             }
 
+            string[] fileNames = Directory.GetFiles(folderPath)
+                .Select(x => Path.GetFileName(x))
+                .ToArray();
 
             string imageName = GetImageFromLanguage(task.Language);
-            string starterFile = GetStartFileFromLanguage(task.Language);
+            string starterFile = GetStartFileFromLanguage(task.Language, fileNames);
 
-            if (!Directory.EnumerateFiles(folderPath).Any(file => file.EndsWith(starterFile)))
+            if (string.IsNullOrEmpty(starterFile))
             {
                 throw new FileNotFoundException("No starter file found");
             }
@@ -69,12 +72,15 @@ namespace WebApplication1.Services
             }
         }
 
-        private string GetStartFileFromLanguage(string language)
+        private string GetStartFileFromLanguage(string language, string[] fileNames)
         {
+            if (fileNames == null || fileNames.Length == 0)
+                return string.Empty;
+
             switch (language.ToLower())
             {
                 case "python":
-                    return "main.py";
+                    return fileNames.SingleOrDefault(x => x == "main.py" || x == "tests.py") ?? string.Empty;
 
                 default:
                     throw new NotSupportedException($"{language} is not supported yet");

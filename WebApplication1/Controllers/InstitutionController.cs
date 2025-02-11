@@ -205,7 +205,7 @@ namespace WebApplication1.Controllers
             }
         }
 
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpGet]
         public async Task<IActionResult> GetRequests(int? instId)
         {
@@ -230,14 +230,21 @@ namespace WebApplication1.Controllers
             return View("RequestsList", requests);
         }
 
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpPost]
         public async Task<IActionResult> AcceptRequest(int requestId)
         {
             JoinInstitutionRequest? request = await _context.JoinInstitutionRequests
+                .Include(jir => jir.User)
                 .FirstOrDefaultAsync(r => r.Id == requestId);
             if (request == null)
                 return NotFound();
+            User user = await _userManager.GetUserAsync(User);
+            if(!await _userManager.IsInRoleAsync(user, "ADMIN"))
+            {
+                if (await _userManager.IsInRoleAsync(request.User, "TEACHER"))
+                    return Unauthorized();
+            }
 
             UserInstitution ui = new UserInstitution
             {

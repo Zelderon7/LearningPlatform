@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Create";
     var languages = ViewBag.Languages as List<SelectListItem>;
+	var templates = ViewBag.Templates as List<SelectListItem>;
 }
 
 <div class="create-form-container">
@@ -36,6 +37,21 @@
                         @if (languages != null)
                         {
                             foreach (var item in languages)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="control-label">Template</label>
+                    <select name="template" class="form-control">
+						<option value="">Language Default</option>
+                        @if (templates != null)
+                        {
+                            foreach (var item in templates)
                             {
                                 <option value="@item.Value">@item.Text</option>
                             }
