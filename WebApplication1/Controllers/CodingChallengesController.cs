@@ -36,20 +36,36 @@ namespace WebApplication1.Controllers
             if(task == null)
                 return NotFound();
 
-            string folderDir = Path.Combine(AppConstants.CodingTasksDir, task.Id.ToString());
-            if (!Directory.Exists(folderDir))
-                return NotFound("Task directory does not exists");
+            User user = await _userManager.GetUserAsync(User);
 
-            string[] files = Directory.GetFiles(folderDir);
+            if(task.AuthorId == user.Id)
+            {
+                #region Open original directory
 
-            if(files.Length == 0)
-                return NotFound("Task directory is empty");
+                string folderDir = Path.Combine(AppConstants.CodingTasksDir, task.Id.ToString());
+                string[] files = Directory.GetFiles(folderDir);
+
+                CodingIDEVM model1 = new CodingIDEVM
+                {
+                    Task = task,
+                    FolderDir = folderDir,
+                    FilePaths = files
+                };
+
+                TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(model1);
+
+                return RedirectToAction("Index", "Coding");
+
+                #endregion
+            }
+
+            (string folderDir, string[] filePaths) data = await _directoryService.OpenTask(id, user.Id);
 
             CodingIDEVM model = new CodingIDEVM
             {
                 Task = task,
-                FolderDir = folderDir,
-                FilePaths = files
+                FolderDir = data.folderDir,
+                FilePaths = data.filePaths
             };
 
             TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(model);

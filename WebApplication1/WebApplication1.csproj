@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\CodeExecutions\Tasks\" />
+    <Folder Include="Services\CodeExecutions\UserTasks\9\" />
   </ItemGroup>
 
 </Project>

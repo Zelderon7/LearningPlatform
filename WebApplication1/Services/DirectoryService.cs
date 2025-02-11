@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebApplication1.Services
@@ -47,6 +48,62 @@ namespace WebApplication1.Services
             {
                 Directory.Delete(path, true);
             }
+
+            //Delete any user's copy of this task
+            foreach (var directory in Directory.EnumerateDirectories(AppConstants.UserCodingTasksDir))
+            {
+                if (Directory.Exists(Path.Combine(directory, id.ToString())))
+                    Directory.Delete(Path.Combine(directory, id.ToString()), true);
+            }
+        }
+
+        internal async Task<(string folderDir, string[] filePaths)> OpenTask(int taskId, int userId)
+        {
+            #region Check task
+            string folderDir = Path.Combine(AppConstants.CodingTasksDir, taskId.ToString());
+            if (!Directory.Exists(folderDir))
+                throw new Exception("Task directory does not exists");
+
+            string[] files = Directory.GetFiles(folderDir);
+
+            if (files.Length == 0)
+                throw new Exception("Task directory is empty");
+
+            #endregion
+
+            #region Check user's task
+
+            string path = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
+
+            if (Directory.Exists(path))
+            {
+                files = Directory.GetFiles(path);
+                return (path,  files);
+            }
+
+            Directory.CreateDirectory(path);
+
+            if (File.Exists(Path.Combine(path, "restrictedFiles.txt")))
+            {
+                string[] restrictedFiles = File.ReadAllText(Path.Combine(path, "restrictedFiles.txt")).Split([',', ' ']);
+                files = files
+                .Where(f => !restrictedFiles //Excludes any restricted files
+                    .Any(rf => rf == Path.GetFileName(f)) &&
+                    Path.GetFileName(f) != "restrictedFiles.txt")
+                .ToArray();
+            }
+
+            //Copy each file from the original task to the current user's version
+            foreach (string file in files)
+            {
+                File.Copy(file, Path.Combine(path, Path.GetFileName(file)));
+            }
+
+            files = Directory.GetFiles(path);
+            return (path, files);
+
+            #endregion
+
         }
     }
 }
