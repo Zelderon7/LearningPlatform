@@ -77,21 +77,11 @@ namespace WebApplication1.Services
 
             if (Directory.Exists(path))
             {
-                files = Directory.GetFiles(path);
+                files = GetFilteredFilesByRestriction(path);
                 return (path,  files);
             }
 
             Directory.CreateDirectory(path);
-
-            if (File.Exists(Path.Combine(path, "restrictedFiles.txt")))
-            {
-                string[] restrictedFiles = File.ReadAllText(Path.Combine(path, "restrictedFiles.txt")).Split([',', ' ']);
-                files = files
-                .Where(f => !restrictedFiles //Excludes any restricted files
-                    .Any(rf => rf == Path.GetFileName(f)) &&
-                    Path.GetFileName(f) != "restrictedFiles.txt")
-                .ToArray();
-            }
 
             //Copy each file from the original task to the current user's version
             foreach (string file in files)
@@ -99,11 +89,27 @@ namespace WebApplication1.Services
                 File.Copy(file, Path.Combine(path, Path.GetFileName(file)));
             }
 
-            files = Directory.GetFiles(path);
+            files = GetFilteredFilesByRestriction(path);
             return (path, files);
 
             #endregion
 
+        }
+
+        public string[] GetFilteredFilesByRestriction(string folderDir)
+        {
+            string[] files = Directory.GetFiles(folderDir);
+            if (File.Exists(Path.Combine(folderDir, "restrictedFiles.txt")))
+            {
+                string[] restrictedFiles = File.ReadAllText(Path.Combine(folderDir, "restrictedFiles.txt")).Split([',', ' ']);
+                //Excludes any restricted files
+                files = files
+                .Where(f => (!restrictedFiles
+                    .Any(rf => rf == Path.GetFileName(f))) &&
+                    Path.GetFileName(f) != "restrictedFiles.txt")
+                .ToArray();
+            }
+            return files;
         }
     }
 }

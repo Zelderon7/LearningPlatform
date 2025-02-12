@@ -26,9 +26,9 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            if (TempData["CodingIDEVMModel"] != null)
+            if (Request.Cookies.TryGetValue("CodingIDEVMModel", out string data))
             {
-                var model = JsonConvert.DeserializeObject<CodingIDEVM>((string)TempData["CodingIDEVMModel"]);
+                var model = JsonConvert.DeserializeObject<CodingIDEVM>(data);
                 return View("IDE", model);
             }
             return NotFound();
@@ -94,7 +94,12 @@ namespace WebApplication1.Controllers
 
 
             // Storing the complex model in TempData
-            TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(data);
+            var options = new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddHours(2),
+                SameSite = SameSiteMode.Strict
+            };
+            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(data), options);
 
             return RedirectToAction("Index");
         }

@@ -3,7 +3,9 @@
 @{
     Layout = null;
     ViewData["Title"] = Model.Task.Name;
-    string[] files = Model.FilePaths.Select(x => System.IO.Path.GetFileName(x)).ToArray();
+    string[] files = Model.FilePaths
+        .Select(f => System.IO.Path.GetFileName(f))
+        .ToArray();
 }
 
 <!DOCTYPE html>

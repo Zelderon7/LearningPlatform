@@ -29,6 +29,7 @@ namespace WebApplication1.Controllers
             return View(model);
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> OpenChallenge(int id)
         {
@@ -68,7 +69,12 @@ namespace WebApplication1.Controllers
                 FilePaths = data.filePaths
             };
 
-            TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(model);
+            var options = new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+
+            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model), options);
 
             return RedirectToAction("Index", "Coding");
         }
