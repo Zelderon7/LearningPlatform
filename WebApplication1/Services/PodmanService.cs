@@ -26,9 +26,10 @@ namespace WebApplication1.Services
             string[] fileNames = Directory.GetFiles(folderPath)
                 .Select(x => Path.GetFileName(x))
                 .ToArray();
-
-            string imageName = GetImageFromLanguage(task.Language);
+            
             string starterFile = GetStartFileFromLanguage(task.Language, fileNames);
+            string imageName = GetImageFromLanguage(task.Language, starterFile);
+            
 
             if (string.IsNullOrEmpty(starterFile))
             {
@@ -87,12 +88,12 @@ namespace WebApplication1.Services
             }
         }
 
-        private string GetImageFromLanguage(string language)
+        private string GetImageFromLanguage(string language, string starter)
         {
             switch (language.ToLower())
             {
                 case "python":
-                    return "python-image python";
+                    return $"python-image {(starter == "tests.py" ? "pytest" : "python")}";
 
                 default:
                     throw new NotSupportedException($"{language} is not supported yet");

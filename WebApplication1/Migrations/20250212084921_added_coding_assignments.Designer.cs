@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250212084921_added_coding_assignments")]
+    partial class added_coding_assignments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,15 +210,14 @@ namespace WebApplication1.Migrations
                     b.Property<int>("AuthorId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ClassId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("Deadline")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -223,9 +225,6 @@ namespace WebApplication1.Migrations
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MaxPoints")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -236,9 +235,11 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("ClassId");
-
                     b.ToTable("CodingTasks");
+
+                    b.HasDiscriminator().HasValue("CodingTask");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Institution", b =>
@@ -543,6 +544,24 @@ namespace WebApplication1.Migrations
                     b.ToTable("UserInstitutions");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingAssignment", b =>
+                {
+                    b.HasBaseType("WebApplication1.Models.Entities.CodingTask");
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("Deadline")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MaxPoints")
+                        .HasColumnType("int");
+
+                    b.HasIndex("ClassId");
+
+                    b.HasDiscriminator().HasValue("CodingAssignment");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("WebApplication1.Models.Entities.Role", null)
@@ -624,13 +643,7 @@ namespace WebApplication1.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebApplication1.Models.Entities.Class", "Class")
-                        .WithMany()
-                        .HasForeignKey("ClassId");
-
                     b.Navigation("Author");
-
-                    b.Navigation("Class");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinClassRequest", b =>
@@ -729,6 +742,17 @@ namespace WebApplication1.Migrations
                     b.Navigation("Institution");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingAssignment", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Entities.Class", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Class");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Class", b =>

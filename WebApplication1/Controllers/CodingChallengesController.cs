@@ -25,8 +25,11 @@ namespace WebApplication1.Controllers
 
         public async Task<IActionResult> Index()
         {
-            List<CodingTask> model = await _context.CodingTasks.ToListAsync();
-            return View(model);
+            List<CodingTask> model = await _context.CodingTasks
+                .Where(x => x.ClassId == null)
+                .ToListAsync();
+
+             return View(model);
         }
 
         [Authorize]
@@ -39,7 +42,12 @@ namespace WebApplication1.Controllers
 
             User user = await _userManager.GetUserAsync(User);
 
-            if(task.AuthorId == user.Id)
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+
+            if (task.AuthorId == user.Id)
             {
                 #region Open original directory
 
@@ -53,7 +61,7 @@ namespace WebApplication1.Controllers
                     FilePaths = files
                 };
 
-                TempData["CodingIDEVMModel"] = JsonConvert.SerializeObject(model1);
+                Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
 
                 return RedirectToAction("Index", "Coding");
 
@@ -69,19 +77,16 @@ namespace WebApplication1.Controllers
                 FilePaths = data.filePaths
             };
 
-            var options = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddHours(2)
-            };
+            
 
-            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model), options);
+            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model), cookieOptions);
 
             return RedirectToAction("Index", "Coding");
         }
 
-
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             CodingTask model = new CodingTask();
             ViewBag.Languages = new List<SelectListItem>
@@ -89,24 +94,36 @@ namespace WebApplication1.Controllers
                 new SelectListItem { Value = "python", Text = "Python" }
             };
 
+            User user = await _userManager.GetUserAsync(User);
+
             ViewBag.Templates = Directory
                 .EnumerateDirectories(AppConstants.LanguageTemplatesDir)
                 .Skip(1)
                 .Select(d => new SelectListItem(Path.GetFileName(d), Path.GetFileName(d)))
                 .ToList();
 
+            ViewBag.Classes = await _context.UserClasses
+                .Include(uc => uc.User)
+                .Include(uc => uc.Class)
+                .Where(uc => uc.UserId == user.Id)
+                .Select(uc => uc.Class)
+                .ToListAsync();
+
             return View(model);
         }
 
         [Authorize(Roles = "TEACHER,ADMIN")]
         [HttpPost]
-        public async Task<IActionResult> Create(CodingTask data, string template)
+        public async Task<IActionResult> Create(CodingTask data, string template, int classId)
         {
             User user = await _userManager.GetUserAsync(User);
             data.AuthorId = user.Id;
-
-            _context.Add(data);
-            _context.SaveChanges();
+            if(classId > 0)
+            {
+                data.ClassId = classId;
+                data.Deadline = DateTime.UtcNow.AddDays(7);
+                data.MaxPoints = 100;
+            }
 
             string folderDir = Path.Combine(AppConstants.CodingTasksDir, data.Id.ToString());
             try

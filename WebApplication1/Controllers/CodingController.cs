@@ -29,6 +29,14 @@ namespace WebApplication1.Controllers
             if (Request.Cookies.TryGetValue("CodingIDEVMModel", out string data))
             {
                 var model = JsonConvert.DeserializeObject<CodingIDEVM>(data);
+                if (model.Output.Contains("FAILED"))
+                {
+                    ViewData["IsValidSolution"] = false;
+                }
+                else
+                {
+                    ViewData["IsValidSolution"] = true;
+                }
                 return View("IDE", model);
             }
             return NotFound();
@@ -73,6 +81,7 @@ namespace WebApplication1.Controllers
                 if (!string.IsNullOrEmpty(request.FilePath) && !string.IsNullOrEmpty(request.Content))
                 {
                     System.IO.File.WriteAllText(request.FilePath, request.Content);
+                    ViewData["IsValidSolution"] = false;
                     return Json(new { success = true });
                 }
 
@@ -91,7 +100,6 @@ namespace WebApplication1.Controllers
 
             data.Output = result.output;
             data.Error = result.error;
-
 
             // Storing the complex model in TempData
             var options = new CookieOptions

@@ -6,6 +6,8 @@
     string[] files = Model.FilePaths
         .Select(f => System.IO.Path.GetFileName(f))
         .ToArray();
+
+    bool isValidSolution = (bool)(ViewData["IsValidSolution"] ?? false);
 }
 
 <!DOCTYPE html>
@@ -150,6 +152,9 @@
                     <button type="submit" id="submitButton">Submit Code</button>
                 </form>
                 <button id="resetButton">Reset Code</button>
+                @if(isValidSolution){
+                    <button type="submit" id="submitSolutionButton" style="background-color: #43c570; margin-left: auto;">Submit</button>
+                }
             </div>
 
             <!-- Output Area -->
@@ -252,6 +257,8 @@
                         console.error('Error saving file:', data.message);
                         outputContainer.innerHTML = `<p style="color: red;">Error saving file: ${data.message}</p>`;
                     }
+                    
+                    document.getElementById('submitSolutionButton').remove();
                 })
                 .catch(error => {
                     console.error('Request failed:', error);
