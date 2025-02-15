@@ -258,7 +258,7 @@
                         outputContainer.innerHTML = `<p style="color: red;">Error saving file: ${data.message}</p>`;
                     }
                     
-                    document.getElementById('submitSolutionButton').remove();
+                    document.getElementById('submitSolutionButton')?.remove();
                 })
                 .catch(error => {
                     console.error('Request failed:', error);

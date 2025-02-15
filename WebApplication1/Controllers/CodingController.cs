@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers
             if (Request.Cookies.TryGetValue("CodingIDEVMModel", out string data))
             {
                 var model = JsonConvert.DeserializeObject<CodingIDEVM>(data);
-                if (model.Output.Contains("FAILED"))
+                if (model.Output.Contains("FAILED") || model.Output.Length == 0)
                 {
                     ViewData["IsValidSolution"] = false;
                 }
