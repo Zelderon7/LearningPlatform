@@ -1,20 +1,11 @@
-﻿#By default this file will not be visible to anyone solving this task
-#You can change this by modifying the 'visible' variable below
-
-#Do not delete this import
+﻿# Import the function to test
 from script import task
+import pytest
 
-# Write your tests below :)
-
-def main():
-	# Calling the test function
-    test_task()
-    print("Test passed!")
-
+# Test function
 def test_task():
-	assert task() == 'Hello, world!'
+    result = task()
+    expected = "Hello, world!"
+    assert result == expected, f"Expected {expected}, but got {result}"
 
-
-# Ensure the main function is called when the script is run
-if __name__ == "__main__":
-    main()
+# No need for a main function, pytest will discover and run this test automatically
