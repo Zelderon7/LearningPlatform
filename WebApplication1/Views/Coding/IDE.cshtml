@@ -119,6 +119,7 @@
                 {
                     <div class="file-tab @(i == 0 ? "active" : "")" data-index="@i">@files[i]</div>
                 }
+                <a class="file-tab" id="newFile" asp-action="NewFile" asp-route-taskId="@Model.Task.Id">+</a>
             </div>
 
             <!-- Monaco Editor -->
@@ -209,6 +210,16 @@
 
             // Initialize the first editor
             createEditor(0);
+
+            document.getElementById("newFile").addEventListener("click", function(event) {
+                event.preventDefault(); // Prevent the default navigation
+
+                let fileName = prompt("Enter file name:");
+                if (fileName) {
+                    this.href = this.getAttribute("href") + "&fileName=" + encodeURIComponent(fileName);
+                    window.location.href = this.href; // Navigate to the new URL with the file name
+                }
+            });
 
             // Submit Button Click Handler
             submitButton.addEventListener('click', () => {

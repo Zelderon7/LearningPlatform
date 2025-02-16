@@ -7,6 +7,11 @@ namespace WebApplication1.Services
 {
     public class DirectoryService
     {
+        public string GetTaskDirectory(int taskId)
+        {
+            return Path.Combine(AppConstants.CodingTasksDir, taskId.ToString());
+        }
+
         public async Task InitializeTaskFolder(string folderDir, string language, string template = "")
         {
             if (Directory.Exists(folderDir))

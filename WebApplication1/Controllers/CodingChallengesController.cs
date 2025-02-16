@@ -125,6 +125,9 @@ namespace WebApplication1.Controllers
                 data.MaxPoints = 100;
             }
 
+            _context.Add(data);
+            _context.SaveChanges();
+
             string folderDir = Path.Combine(AppConstants.CodingTasksDir, data.Id.ToString());
             try
             {

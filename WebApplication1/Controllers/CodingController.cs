@@ -9,6 +9,8 @@ using WebApplication1.Models.DTOs;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using WebApplication1.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1.Controllers
 {
@@ -17,10 +19,14 @@ namespace WebApplication1.Controllers
     {
         PodmanService _podmanService;
         UserManager<User> _userManager;
-        public CodingController(PodmanService podmanService, UserManager<User> userManager)
+        ApplicationDbContext _context;
+        DirectoryService _directoryService;
+        public CodingController(PodmanService podmanService, UserManager<User> userManager, ApplicationDbContext context, DirectoryService directoryService)
         {
             _podmanService = podmanService;
             _userManager = userManager;
+            _context = context;
+            _directoryService = directoryService;
         }
 
         [HttpGet]
@@ -118,5 +124,26 @@ namespace WebApplication1.Controllers
             User user = await _userManager.GetUserAsync(User);
         }
 
+        [Authorize(Roles = "TEACHER,ADMIN")]
+        public async Task<IActionResult> NewFile(string fileName, int taskId)
+        {
+            CodingTask? task = await _context.CodingTasks.SingleOrDefaultAsync(t => t.Id == taskId);
+            if (task == null)
+                return NotFound();
+
+            string folderDir = _directoryService.GetTaskDirectory(taskId);
+
+            if (string.IsNullOrEmpty(fileName) ||
+                !(fileName.Where(c => c == '.').Count() == 1 &&
+                    AppConstants.AllowedFileExtentions.Contains("." + fileName.Split('.')[^1])))
+                return BadRequest();
+
+            if (Directory.EnumerateFiles(folderDir).Contains(fileName))
+                return Conflict();
+
+            using (FileStream _ = System.IO.File.Create(Path.Combine(folderDir, fileName))) { }
+
+            return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
+        }
     }
 }

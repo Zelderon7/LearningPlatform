@@ -6,5 +6,7 @@
         public const string UserCodingTasksDir = "D:\\gluposti\\School\\FinalYearProject\\LearningPlatform\\WebApplication1\\WebApplication1\\Services\\CodeExecutions\\UserTasks\\";
 
         public const string LanguageTemplatesDir = "D:\\gluposti\\School\\FinalYearProject\\LearningPlatform\\WebApplication1\\WebApplication1\\Services\\CodeExecutions\\LanguageTemplates";
+
+        public static readonly string[] AllowedFileExtentions = [".py", ".txt"];
     }
 }
