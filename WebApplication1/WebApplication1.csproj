@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Services\CodeExecutions\TaskSubmissions\" />
     <Folder Include="Services\CodeExecutions\UserTasks\" />
   </ItemGroup>
 

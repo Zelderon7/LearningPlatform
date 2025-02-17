@@ -32,7 +32,7 @@ namespace WebApplication1.Services
             }
         }
 
-        public async Task ResetDirectory(string folderDir, string taskPath)
+        internal async Task ResetDirectory(string folderDir, string taskPath)
         {
             if (!Directory.Exists(folderDir) || !Directory.Exists(taskPath))
                 throw new Exception("Directory not found");
@@ -117,12 +117,30 @@ namespace WebApplication1.Services
             return files;
         }
 
-        internal async Task ResetDirectory(int taskId, int userId)
+        public async Task ResetDirectory(int taskId, int userId)
         {
             string taskDir = GetTaskDirectory(taskId);
             string folderDir = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
 
             await ResetDirectory(folderDir, taskDir);
+        }
+
+        public async Task SaveSubmission(int taskId, int userId)
+        {
+            string folderDir = Path.Combine(AppConstants.UserCodingTasksDir + userId.ToString(), taskId.ToString());
+            string submitionDir = Path.Combine(AppConstants.TaskSubmissionsDir, userId.ToString(), taskId.ToString());
+            if (!Directory.Exists(folderDir))
+                throw new NullReferenceException();
+
+            if (Directory.Exists(submitionDir))
+                Directory.Delete(submitionDir, true);
+
+            Directory.CreateDirectory(folderDir);
+
+            foreach(string file in Directory.EnumerateFiles(folderDir))
+            {
+                File.Copy(file, Path.Combine(submitionDir, Path.GetFileName(file)), true);
+            }
         }
     }
 }
