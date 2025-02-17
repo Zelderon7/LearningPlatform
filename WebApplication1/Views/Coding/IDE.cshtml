@@ -79,18 +79,29 @@
             margin-top: 20px;
         }
 
-            .button-container button {
+            .button-container button, .button {
                 padding: 10px 20px;
                 background-color: #007bff;
                 color: white;
                 border: none;
                 cursor: pointer;
                 border-radius: 5px;
+                text-decoration: none;
             }
 
                 .button-container button:hover {
                     background-color: #0056b3;
                 }
+
+            .button-danger{
+                font-size: smaller;
+                background-color: #d75752;
+            }
+
+            .button-danger:hover{
+                background-color: #ad3b37
+            }
+
 
         .output-container {
             background-color: #2d2d2d;
@@ -119,7 +130,9 @@
                 {
                     <div class="file-tab @(i == 0 ? "active" : "")" data-index="@i">@files[i]</div>
                 }
-                <a class="file-tab" id="newFile" asp-action="NewFile" asp-route-taskId="@Model.Task.Id">+</a>
+                @if(User.IsInRole("TEACHER") || User.IsInRole("ADMIN")){
+                    <a class="file-tab" id="newFile" asp-action="NewFile" asp-route-taskId="@Model.Task.Id">+</a>
+                }
             </div>
 
             <!-- Monaco Editor -->
@@ -152,7 +165,7 @@
 
                     <button type="submit" id="submitButton">Submit Code</button>
                 </form>
-                <button id="resetButton">Reset Code</button>
+                <a class="button button-danger" asp-action="ResetCode" asp-route-taskId="@Model.Task.Id">Reset Code</a>
                 @if(isValidSolution){
                     <button type="submit" id="submitSolutionButton" style="background-color: #43c570; margin-left: auto;">Submit</button>
                 }
@@ -231,13 +244,6 @@
                 outputContainer.innerHTML = `<p>Submitted code for ${Model.FilePaths[activeIndex]}:</p><pre>${code}</pre>`;
             });
 
-            // Reset Button Click Handler
-            resetButton.addEventListener('click', () => {
-                const activeTab = document.querySelector('.file-tab.active');
-                const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
-                editors[activeIndex].setValue(fileContents[activeIndex]);
-                outputContainer.innerHTML = `<p>Code reset to initial state.</p>`;
-            });
         });
 
         document.addEventListener('keydown', function (event) {

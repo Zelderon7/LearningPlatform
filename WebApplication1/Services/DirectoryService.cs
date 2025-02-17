@@ -37,7 +37,7 @@ namespace WebApplication1.Services
             if (!Directory.Exists(folderDir) || !Directory.Exists(taskPath))
                 throw new Exception("Directory not found");
 
-            Directory.Delete(folderDir);
+            Directory.Delete(folderDir, true);
             Directory.CreateDirectory(folderDir);
 
             foreach (var file in Directory.EnumerateFiles(taskPath))
@@ -115,6 +115,14 @@ namespace WebApplication1.Services
                 .ToArray();
             }
             return files;
+        }
+
+        internal async Task ResetDirectory(int taskId, int userId)
+        {
+            string taskDir = GetTaskDirectory(taskId);
+            string folderDir = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
+
+            await ResetDirectory(folderDir, taskDir);
         }
     }
 }

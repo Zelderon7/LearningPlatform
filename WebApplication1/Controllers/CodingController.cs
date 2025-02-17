@@ -118,10 +118,12 @@ namespace WebApplication1.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize]
         public async Task<IActionResult> ResetCode(int taskId)
         {
-            throw new NotImplementedException();
             User user = await _userManager.GetUserAsync(User);
+            await _directoryService.ResetDirectory(taskId, user.Id);
+            return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
         }
 
         [Authorize(Roles = "TEACHER,ADMIN")]
