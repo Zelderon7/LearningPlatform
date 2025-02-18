@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data;
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250218200023_created_task_submissions")]
+    partial class created_task_submissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -164,7 +167,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("InstitutionId");
 
-                    b.ToTable("Classes", (string)null);
+                    b.ToTable("Classes");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.ClassSection", b =>
@@ -193,7 +196,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("ClassSections", (string)null);
+                    b.ToTable("ClassSections");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.CodingTask", b =>
@@ -238,7 +241,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("CodingTasks", (string)null);
+                    b.ToTable("CodingTasks");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Institution", b =>
@@ -280,7 +283,7 @@ namespace WebApplication1.Migrations
 
                     b.HasKey("InstitutionId");
 
-                    b.ToTable("Institutions", (string)null);
+                    b.ToTable("Institutions");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinClassRequest", b =>
@@ -306,7 +309,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JoinClassRequests", (string)null);
+                    b.ToTable("JoinClassRequests");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinInstitutionRequest", b =>
@@ -332,7 +335,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JoinInstitutionRequests", (string)null);
+                    b.ToTable("JoinInstitutionRequests");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Lesson", b =>
@@ -358,7 +361,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ClassSectionId");
 
-                    b.ToTable("Lessons", (string)null);
+                    b.ToTable("Lessons");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.LessonContent", b =>
@@ -388,7 +391,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("LessonsContent", (string)null);
+                    b.ToTable("LessonsContent");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Role", b =>
@@ -444,7 +447,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("CodingTaskSubmissions", (string)null);
+                    b.ToTable("CodingTaskSubmissions");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.User", b =>
@@ -539,7 +542,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClasses", (string)null);
+                    b.ToTable("UserClasses");
                 });
 
             modelBuilder.Entity("asp_server.Models.Entity.JoinTables.UserInstitution", b =>
@@ -566,7 +569,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserInstitutions", (string)null);
+                    b.ToTable("UserInstitutions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

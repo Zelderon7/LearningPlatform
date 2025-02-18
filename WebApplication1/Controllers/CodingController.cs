@@ -147,5 +147,21 @@ namespace WebApplication1.Controllers
 
             return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
         }
+
+        public async Task<IActionResult> SubmitTask(int taskId)
+        {
+            User user = await _userManager.GetUserAsync(User);
+
+            TaskSubmission submission = new TaskSubmission();
+            submission.TaskId = taskId;
+            submission.AuthorId = user.Id;
+
+            _context.CodingTaskSubmissions.Add(submission);
+            await _context.SaveChangesAsync();
+
+            await _directoryService.SaveSubmission(taskId, user.Id, submission.Id);
+
+            return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
+        }
     }
 }

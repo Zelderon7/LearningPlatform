@@ -23,6 +23,7 @@ namespace WebApplication1.Data
         public DbSet<JoinClassRequest> JoinClassRequests { get; set; }
         public DbSet<ClassSection> ClassSections { get; set; }
         public DbSet<CodingTask> CodingTasks { get; set; }
+        public DbSet<TaskSubmission> CodingTaskSubmissions { get; set; }
 
         // Join Tables
         

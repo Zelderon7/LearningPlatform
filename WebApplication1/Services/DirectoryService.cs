@@ -125,17 +125,17 @@ namespace WebApplication1.Services
             await ResetDirectory(folderDir, taskDir);
         }
 
-        public async Task SaveSubmission(int taskId, int userId)
+        public async Task SaveSubmission(int taskId, int userId, int submissionId)
         {
-            string folderDir = Path.Combine(AppConstants.UserCodingTasksDir + userId.ToString(), taskId.ToString());
-            string submitionDir = Path.Combine(AppConstants.TaskSubmissionsDir, userId.ToString(), taskId.ToString());
+            string folderDir = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
+            string submitionDir = Path.Combine(AppConstants.TaskSubmissionsDir, taskId.ToString(), submissionId.ToString());
             if (!Directory.Exists(folderDir))
                 throw new NullReferenceException();
 
             if (Directory.Exists(submitionDir))
                 Directory.Delete(submitionDir, true);
 
-            Directory.CreateDirectory(folderDir);
+            Directory.CreateDirectory(submitionDir);
 
             foreach(string file in Directory.EnumerateFiles(folderDir))
             {
