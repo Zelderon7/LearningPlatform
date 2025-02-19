@@ -18,5 +18,10 @@ namespace WebApplication1.Models.Entities
         //Nav props
         public User Author { get; set; }
         public CodingTask Task { get; set; }
+
+        public TaskSubmission()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
     }
 }
