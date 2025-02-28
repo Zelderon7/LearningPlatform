@@ -26,7 +26,7 @@ namespace WebApplication1.Data
         public DbSet<ClassSection> ClassSections { get; set; }
         public DbSet<CodingTask> CodingTasks { get; set; }
         public DbSet<TaskSubmission> CodingTaskSubmissions { get; set; }
-        public DbSet<Models.Entities.CodingFiles.CodingFile> Files { get; set; }
+        public DbSet<CodingFile> CodingFiles { get; set; }
         public DbSet<CodingFolder> CodingFolders { get; set; }
 
         // Join Tables
@@ -45,6 +45,18 @@ namespace WebApplication1.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<UserTask>()
+                .HasOne(t => t.Task)
+                .WithOne()
+                .HasForeignKey<UserTask>(t => t.TaskId) // Correct way to define FK
+                .OnDelete(DeleteBehavior.Restrict); // Use Restrict, ClientSetNull, or another valid option
+
+            builder.Entity<TaskSubmission>()
+                .HasOne(t => t.Folder)
+                .WithOne()
+                .HasForeignKey<TaskSubmission>(t => t.FolderId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
 

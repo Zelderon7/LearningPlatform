@@ -7,8 +7,8 @@ namespace WebApplication1.Models.Entities.CodingFiles
     {
         [Key]
         public int Id { get; set; }
-        [AllowNull]
-        public string? Name { get; set; }
+        [Required]
+        public string Name { get; set; }
 
         //Nav props
 

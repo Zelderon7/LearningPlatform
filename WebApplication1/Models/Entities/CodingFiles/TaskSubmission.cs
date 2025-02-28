@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet.Actions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace WebApplication1.Models.Entities.CodingFiles
 {
@@ -15,8 +16,8 @@ namespace WebApplication1.Models.Entities.CodingFiles
         public int AuthorId { get; set; }
         [ForeignKey("Task")]
         public int TaskId { get; set; }
-        [ForeignKey("Folder")]
-        public int FolderId { get; set; }
+        [ForeignKey("Folder"), AllowNull]
+        public int? FolderId { get; set; }
 
         //Nav props
         public User Author { get; set; }

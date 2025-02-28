@@ -14,9 +14,8 @@ namespace WebApplication1.Models.Entities.CodingFiles
         public string? ImageUrl { get; set; }
         [Required]
         public string Description { get; set; }
-        [AllowNull]
-        public DateTime? Deadline { get; set; }
-        public int MaxPoints { get; set; }
+        [AllowNull, Range(1, 100)]
+        public int? MaxPoints { get; set; }
 
         //Foreign keys
         [ForeignKey("Class"), AllowNull]
@@ -25,8 +24,8 @@ namespace WebApplication1.Models.Entities.CodingFiles
         [ForeignKey("Author")]
         public int AuthorId { get; set; }
 
-        [ForeignKey("Folder")]
-        public int FolderId { get; set; }
+        [ForeignKey("Folder"), AllowNull]
+        public int? FolderId { get; set; }
 
         //Navigation properties
         public Class Class { get; set; }

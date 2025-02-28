@@ -51,8 +51,8 @@ namespace WebApplication1.Services
             foreach (var file in template.Folder.Files)
             {
                 var newFile = (CodingFile)file.Clone();
-                newFile.FolderId = task.FolderId;
-                _context.Files.Add(newFile);
+                newFile.FolderId = (int)task.FolderId;
+                _context.CodingFiles.Add(newFile);
             }
 
             await _context.SaveChangesAsync();
