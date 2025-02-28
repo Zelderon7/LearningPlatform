@@ -164,7 +164,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("InstitutionId");
 
-                    b.ToTable("Classes", (string)null);
+                    b.ToTable("Classes");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.ClassSection", b =>
@@ -193,7 +193,72 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("ClassSections", (string)null);
+                    b.ToTable("ClassSections");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.CodingFile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("Files");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.CodingFolder", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CodingFolders");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.TaskTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("TaskTemplates");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.CodingTask", b =>
@@ -217,6 +282,9 @@ namespace WebApplication1.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
 
@@ -238,7 +306,9 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ClassId");
 
-                    b.ToTable("CodingTasks", (string)null);
+                    b.HasIndex("FolderId");
+
+                    b.ToTable("CodingTasks");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Institution", b =>
@@ -280,7 +350,7 @@ namespace WebApplication1.Migrations
 
                     b.HasKey("InstitutionId");
 
-                    b.ToTable("Institutions", (string)null);
+                    b.ToTable("Institutions");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinClassRequest", b =>
@@ -306,7 +376,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JoinClassRequests", (string)null);
+                    b.ToTable("JoinClassRequests");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinInstitutionRequest", b =>
@@ -332,7 +402,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("JoinInstitutionRequests", (string)null);
+                    b.ToTable("JoinInstitutionRequests");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Lesson", b =>
@@ -358,7 +428,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("ClassSectionId");
 
-                    b.ToTable("Lessons", (string)null);
+                    b.ToTable("Lessons");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.LessonContent", b =>
@@ -388,7 +458,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("LessonId");
 
-                    b.ToTable("LessonsContent", (string)null);
+                    b.ToTable("LessonsContent");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Role", b =>
@@ -435,6 +505,9 @@ namespace WebApplication1.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
@@ -442,9 +515,11 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("FolderId");
+
                     b.HasIndex("TaskId");
 
-                    b.ToTable("CodingTaskSubmissions", (string)null);
+                    b.ToTable("CodingTaskSubmissions");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.User", b =>
@@ -519,6 +594,35 @@ namespace WebApplication1.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.JoinTables.UserTask", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserTasks");
+                });
+
             modelBuilder.Entity("asp_server.Models.Entity.JoinTables.UserClass", b =>
                 {
                     b.Property<int>("UserClassId")
@@ -539,7 +643,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClasses", (string)null);
+                    b.ToTable("UserClasses");
                 });
 
             modelBuilder.Entity("asp_server.Models.Entity.JoinTables.UserInstitution", b =>
@@ -566,7 +670,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserInstitutions", (string)null);
+                    b.ToTable("UserInstitutions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -642,6 +746,37 @@ namespace WebApplication1.Migrations
                     b.Navigation("Class");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.CodingFile", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Entities.CodingFiles.CodingFolder", "Folder")
+                        .WithMany("Files")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.CodingFolder", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Entities.CodingTask", null)
+                        .WithOne()
+                        .HasForeignKey("WebApplication1.Models.Entities.CodingFiles.CodingFolder", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.TaskTemplate", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Entities.CodingFiles.CodingFolder", "Folder")
+                        .WithMany()
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
+                });
+
             modelBuilder.Entity("WebApplication1.Models.Entities.CodingTask", b =>
                 {
                     b.HasOne("WebApplication1.Models.Entities.User", "Author")
@@ -654,9 +789,17 @@ namespace WebApplication1.Migrations
                         .WithMany()
                         .HasForeignKey("ClassId");
 
+                    b.HasOne("WebApplication1.Models.Entities.CodingFiles.CodingFolder", "Folder")
+                        .WithMany()
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Author");
 
                     b.Navigation("Class");
+
+                    b.Navigation("Folder");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.JoinClassRequest", b =>
@@ -727,6 +870,12 @@ namespace WebApplication1.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WebApplication1.Models.Entities.CodingFiles.CodingFolder", "Folder")
+                        .WithMany()
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("WebApplication1.Models.Entities.CodingTask", "Task")
                         .WithMany()
                         .HasForeignKey("TaskId")
@@ -735,7 +884,36 @@ namespace WebApplication1.Migrations
 
                     b.Navigation("Author");
 
+                    b.Navigation("Folder");
+
                     b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.JoinTables.UserTask", b =>
+                {
+                    b.HasOne("WebApplication1.Models.Entities.CodingFiles.CodingFolder", "Folder")
+                        .WithMany()
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebApplication1.Models.Entities.CodingTask", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebApplication1.Models.Entities.User", "User")
+                        .WithOne()
+                        .HasForeignKey("WebApplication1.Models.JoinTables.UserTask", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("asp_server.Models.Entity.JoinTables.UserClass", b =>
@@ -786,6 +964,11 @@ namespace WebApplication1.Migrations
             modelBuilder.Entity("WebApplication1.Models.Entities.ClassSection", b =>
                 {
                     b.Navigation("Lessons");
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.Entities.CodingFiles.CodingFolder", b =>
+                {
+                    b.Navigation("Files");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Entities.Institution", b =>
