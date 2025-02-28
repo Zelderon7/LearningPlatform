@@ -1,3 +1,4 @@
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,13 @@ namespace WebApplication1
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            string connectionString;
+#if RELEASE
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            connectionString = builder.Configuration.GetConnectionString("ReleaseConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+#else
+            connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+#endif
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -39,7 +44,16 @@ namespace WebApplication1
             builder.Services.AddScoped<PodmanService>();
             builder.Services.AddScoped<DirectoryService>();
 
-            
+
+
+            var account = new Account(
+                builder.Configuration.GetSection("Cloudinary")["CloudName"],
+                builder.Configuration.GetSection("Cloudinary")["ApiKey"],
+                builder.Configuration.GetSection("Cloudinary")["ApiSecret"]
+                );
+
+            var cloudinary = new Cloudinary(account);
+            builder.Services.AddSingleton(cloudinary);
 
 
             builder.Services.AddControllersWithViews();
