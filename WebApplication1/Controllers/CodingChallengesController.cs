@@ -12,7 +12,7 @@ using WebApplication1.Services;
 namespace WebApplication1.Controllers
 {
     public class CodingChallengesController : Controller
-    {
+    {/*
         ApplicationDbContext _context;
         UserManager<User> _userManager;
         DirectoryService _directoryService;
@@ -159,6 +159,6 @@ namespace WebApplication1.Controllers
             
 
             return RedirectToAction("OpenChallenge", data.Id);
-        }
+        }*/
     }
 }

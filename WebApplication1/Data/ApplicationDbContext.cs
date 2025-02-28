@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.Entities.CodingFiles;
+using WebApplication1.Models.JoinTables;
 
 namespace WebApplication1.Data
 {
@@ -24,17 +26,28 @@ namespace WebApplication1.Data
         public DbSet<ClassSection> ClassSections { get; set; }
         public DbSet<CodingTask> CodingTasks { get; set; }
         public DbSet<TaskSubmission> CodingTaskSubmissions { get; set; }
+        public DbSet<Models.Entities.CodingFiles.CodingFile> Files { get; set; }
+        public DbSet<CodingFolder> CodingFolders { get; set; }
 
         // Join Tables
         
         public DbSet<UserInstitution> UserInstitutions { get; set; }
         public DbSet<UserClass> UserClasses { get; set; }
+        public DbSet<TaskTemplate> TaskTemplates { get; set; }
+        public DbSet<UserTask> UserTasks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.ConfigureWarnings(warnings =>
                 warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+        }
+
 
     }
 }

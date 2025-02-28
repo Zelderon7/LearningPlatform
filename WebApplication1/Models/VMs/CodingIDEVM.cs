@@ -1,4 +1,4 @@
-﻿using WebApplication1.Models.Entities;
+﻿using WebApplication1.Models.Entities.CodingFiles;
 
 namespace WebApplication1.Models.VMs
 {

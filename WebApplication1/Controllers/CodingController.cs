@@ -16,7 +16,7 @@ namespace WebApplication1.Controllers
 {
     [Authorize]
     public class CodingController : Controller
-    {
+    {/*
         PodmanService _podmanService;
         UserManager<User> _userManager;
         ApplicationDbContext _context;
@@ -162,6 +162,6 @@ namespace WebApplication1.Controllers
             await _directoryService.SaveSubmission(taskId, user.Id, submission.Id);
 
             return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
-        }
+        }*/
     }
 }
