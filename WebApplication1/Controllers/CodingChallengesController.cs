@@ -61,7 +61,9 @@ namespace WebApplication1.Controllers
             if(task == null)
                 return NotFound();
 
-            User user = await _userManager.GetUserAsync(User);
+            User? user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Challenge();
 
             var cookieOptions = new CookieOptions
             {

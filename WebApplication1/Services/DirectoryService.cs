@@ -152,6 +152,7 @@ namespace WebApplication1.Services
         {
             UserTask? ut = await _context.UserTasks
                 .Include(u => u.Folder)
+                        .ThenInclude(f => f.Files)
                 .SingleOrDefaultAsync(u => u.TaskId == taskId && u.UserId == userId);
 
             if (ut == null)
@@ -159,6 +160,7 @@ namespace WebApplication1.Services
                 await CreateUserTask(userId, taskId);
                 ut = await _context.UserTasks
                     .Include(u => u.Folder)
+                        .ThenInclude(f => f.Files)
                     .SingleOrDefaultAsync(u => u.TaskId == taskId && u.UserId == userId);
             }
 
