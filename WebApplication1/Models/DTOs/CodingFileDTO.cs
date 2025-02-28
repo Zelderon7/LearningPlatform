@@ -1,12 +1,17 @@
 ﻿using System.Text;
+using System.Text.Json.Serialization;
 using WebApplication1.Models.Entities.CodingFiles;
 
 namespace WebApplication1.Models.DTOs
 {
     public class CodingFileDTO
     {
+        [JsonInclude]
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Extention { get; set; }
+        [JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string FullName 
         { 
             get => Name + Extention;
@@ -27,8 +32,9 @@ namespace WebApplication1.Models.DTOs
 
         }
 
-        public CodingFileDTO(string name, string extention, string data)
+        public CodingFileDTO(int id, string name, string extention, string data)
         {
+            Id = id;
             Name = name;
             Extention = extention;
             Data = data;
@@ -36,6 +42,7 @@ namespace WebApplication1.Models.DTOs
 
         public CodingFileDTO(CodingFile file)
         {
+            Id = file.Id;
             Name = file.Name;
             Extention = file.Type;
             Data = Encoding.UTF8.GetString(file.Data);

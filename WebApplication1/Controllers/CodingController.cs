@@ -11,12 +11,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using WebApplication1.Data;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Models.Entities.CodingFiles;
 
 namespace WebApplication1.Controllers
 {
     [Authorize]
     public class CodingController : Controller
-    {/*
+    {
         PodmanService _podmanService;
         UserManager<User> _userManager;
         ApplicationDbContext _context;
@@ -48,61 +49,30 @@ namespace WebApplication1.Controllers
             return NotFound();
         }
 
-        [HttpGet]
-        public IActionResult Test()
-        {
-            CodingTask codingTask = new CodingTask()
-            {
-                Id = 1,
-                Name = "Hello, world in python",
-                Description = "Write \"Hello, world\" in python",
-                Language = "Python"
-            };
-
-            string tempFolderName = Guid.NewGuid().ToString();
-            // Get the system's temp directory
-            string tempFolderPath = Path.Combine(Path.GetTempPath(), tempFolderName);
-
-            Directory.CreateDirectory(tempFolderPath);
-            string code = "print('Hello, world!')";
-            string filePath = Path.Combine(tempFolderPath, "main.py");
-
-            System.IO.File.WriteAllText(filePath, code);
-
-            CodingIDEVM model = new CodingIDEVM
-            {
-                Task = codingTask,
-                FolderDir = tempFolderPath,
-                FilePaths = [filePath]
-            };
-
-            return View("IDE", model);
-        }
 
         [HttpPost]
-        public IActionResult SaveCode([FromBody] SaveCodeRequest request)
+        public async Task<IActionResult> SaveCode([FromBody] SaveCodeRequest request)
         {
             try
             {
-                if (!string.IsNullOrEmpty(request.FilePath) && !string.IsNullOrEmpty(request.Content))
-                {
-                    System.IO.File.WriteAllText(request.FilePath, request.Content);
-                    ViewData["IsValidSolution"] = false;
-                    return Json(new { success = true });
-                }
+                ViewData["IsValidSolution"] = false;
 
-                return Json(new { success = false, message = "Invalid file path or content." });
+                await _directoryService.SaveFileAsync(request);
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> RunCode(CodingIDEVM data)
         {
-            (string output, string error) result = await _podmanService.RunFolderAsync(data.Task, data.FolderDir);
+
+            throw new NotImplementedException();
+            (string output, string error) result = ("", "");
 
             data.Output = result.output;
             data.Error = result.error;
@@ -117,39 +87,43 @@ namespace WebApplication1.Controllers
 
             return RedirectToAction("Index");
         }
-
+        
         [Authorize]
         public async Task<IActionResult> ResetCode(int taskId)
         {
+            throw new NotImplementedException();
             User user = await _userManager.GetUserAsync(User);
             await _directoryService.ResetDirectory(taskId, user.Id);
             return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
         }
-
+        
         [Authorize(Roles = "TEACHER,ADMIN")]
         public async Task<IActionResult> NewFile(string fileName, int taskId)
         {
-            CodingTask? task = await _context.CodingTasks.SingleOrDefaultAsync(t => t.Id == taskId);
+            CodingTask? task = await _context.CodingTasks
+                .SingleOrDefaultAsync(t => t.Id == taskId);
+
             if (task == null)
                 return NotFound();
 
-            string folderDir = _directoryService.GetTaskDirectory(taskId);
+            try
+            {
+                await _directoryService.CreateFileAsync((int)task.FolderId, fileName);
+            }
+            catch (Exception ex)
+            {
 
-            if (string.IsNullOrEmpty(fileName) ||
-                !(fileName.Where(c => c == '.').Count() == 1 &&
-                    AppConstants.AllowedFileExtentions.Contains("." + fileName.Split('.')[^1])))
-                return BadRequest();
-
-            if (Directory.EnumerateFiles(folderDir).Contains(fileName))
-                return Conflict();
-
-            using (FileStream _ = System.IO.File.Create(Path.Combine(folderDir, fileName))) { }
+            }
+            
 
             return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
         }
+        
 
         public async Task<IActionResult> SubmitTask(int taskId)
         {
+
+            throw new NotImplementedException();
             User user = await _userManager.GetUserAsync(User);
 
             TaskSubmission submission = new TaskSubmission();
@@ -159,9 +133,10 @@ namespace WebApplication1.Controllers
             _context.CodingTaskSubmissions.Add(submission);
             await _context.SaveChangesAsync();
 
-            await _directoryService.SaveSubmission(taskId, user.Id, submission.Id);
+            //await _directoryService.SaveSubmission(taskId, user.Id, submission.Id);
 
             return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
-        }*/
+        }
+
     }
 }

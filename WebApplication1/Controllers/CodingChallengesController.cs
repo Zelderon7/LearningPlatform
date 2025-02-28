@@ -6,13 +6,15 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.Entities.CodingFiles;
 using WebApplication1.Models.VMs;
+using WebApplication1.Models.DTOs;
 using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
     public class CodingChallengesController : Controller
-    {/*
+    {
         ApplicationDbContext _context;
         UserManager<User> _userManager;
         DirectoryService _directoryService;
@@ -32,6 +34,7 @@ namespace WebApplication1.Controllers
              return View(model);
         }
 
+
         [Authorize]
         public async Task<IActionResult> GetAssignments()
         {
@@ -47,12 +50,14 @@ namespace WebApplication1.Controllers
 
             return View("Index", tasks);
         }
-
+        
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> OpenChallenge(int id)
         {
-            CodingTask? task = await _context.CodingTasks.SingleOrDefaultAsync(c => c.Id == id);
+            CodingTask? task = await _context.CodingTasks
+                .SingleOrDefaultAsync(c => c.Id == id);
+
             if(task == null)
                 return NotFound();
 
@@ -63,18 +68,19 @@ namespace WebApplication1.Controllers
                 Expires = DateTime.UtcNow.AddHours(2)
             };
 
+            List<CodingFileDTO> files;
+
             if (task.AuthorId == user.Id)
             {
                 #region Open original directory
 
-                string folderDir = Path.Combine(AppConstants.CodingTasksDir, task.Id.ToString());
-                string[] files = Directory.GetFiles(folderDir);
+                files = await _directoryService.GetFilteredFilesByRestriction((int)task.FolderId);
 
+                task.Folder = null; //Ensures no self referencing loops
                 CodingIDEVM model1 = new CodingIDEVM
                 {
                     Task = task,
-                    FolderDir = folderDir,
-                    FilePaths = files
+                    Files = files
                 };
 
                 Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
@@ -84,22 +90,20 @@ namespace WebApplication1.Controllers
                 #endregion
             }
 
-            (string folderDir, string[] filePaths) data = await _directoryService.OpenTask(id, user.Id);
+            files = await _directoryService.OpenUserTask(id, user.Id);
 
+            task.Folder = null; //Ensures no self referencing loops
             CodingIDEVM model = new CodingIDEVM
             {
                 Task = task,
-                FolderDir = data.folderDir,
-                FilePaths = data.filePaths
+                Files = files,
             };
-
-            
 
             Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model), cookieOptions);
 
             return RedirectToAction("Index", "Coding");
         }
-
+        
         [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -112,11 +116,7 @@ namespace WebApplication1.Controllers
 
             User user = await _userManager.GetUserAsync(User);
 
-            ViewBag.Templates = Directory
-                .EnumerateDirectories(AppConstants.LanguageTemplatesDir)
-                .Skip(1)
-                .Select(d => new SelectListItem(Path.GetFileName(d), Path.GetFileName(d)))
-                .ToList();
+            ViewBag.Templates = new List<SelectListItem>() { };
 
             ViewBag.Classes = await _context.UserClasses
                 .Include(uc => uc.User)
@@ -137,17 +137,16 @@ namespace WebApplication1.Controllers
             if(classId > 0)
             {
                 data.ClassId = classId;
-                data.Deadline = DateTime.UtcNow.AddDays(7);
                 data.MaxPoints = 100;
             }
 
-            _context.Add(data);
+            _context.CodingTasks.Add(data);
             _context.SaveChanges();
 
-            string folderDir = Path.Combine(AppConstants.CodingTasksDir, data.Id.ToString());
+            
             try
             {
-                   await _directoryService.InitializeTaskFolder(folderDir, data.Language, template ?? "");
+                await _directoryService.InitializeTaskFolder(data);
             }
             catch (Exception ex)
             {
@@ -159,6 +158,6 @@ namespace WebApplication1.Controllers
             
 
             return RedirectToAction("OpenChallenge", data.Id);
-        }*/
+        }
     }
 }

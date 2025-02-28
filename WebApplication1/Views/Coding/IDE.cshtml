@@ -3,8 +3,8 @@
 @{
     Layout = null;
     ViewData["Title"] = Model.Task.Name;
-    string[] files = Model.FilePaths
-        .Select(f => System.IO.Path.GetFileName(f))
+	string[] files = Model.Files
+        .Select(f => f.FullName)
         .ToArray();
 
     bool isValidSolution = (bool)(ViewData["IsValidSolution"] ?? false);
@@ -221,15 +221,12 @@
                     <!-- Hidden field for ImageUrl -->
                     <input type="hidden" asp-for="Task.ImageUrl" />
 
-                    <!-- Hidden field for Folder Directory -->
-                    <input type="hidden" asp-for="FolderDir" />
-
                     <!-- Handling FilePaths (if needed) -->
-                    @if (Model.FilePaths != null)
+                    @if (Model.Files != null)
                     {
-                        @for (int i = 0; i < Model.FilePaths.Length; i++)
+                        @for (int i = 0; i < Model.Files.Count(); i++)
                         {
-                            <input type="hidden" asp-for="FilePaths[i]" />
+                            <input type="hidden" asp-for="Files[i]" />
                         }
                     }
 
@@ -254,7 +251,7 @@
         const editors = [];
         require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' }});
         require(['vs/editor/editor.main'], function () {
-            const fileContents = @Html.Raw(Json.Serialize(Model.FilePaths.Select(fp => File.ReadAllText(fp)).ToArray()));
+            const fileContents = @Html.Raw(Json.Serialize(Model.Files?.Select(f => f.Data).ToArray()));
             
             const editorContainer = document.getElementById('editorContainer');
             const outputContainer = document.getElementById('outputContainer');
@@ -323,8 +320,13 @@
                 const activeTab = document.querySelector('.file-tab.active');
                 const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
                 const code = editors[activeIndex].getValue();
-                const filePaths = @Html.Raw(Json.Serialize(Model.FilePaths)); // Correct way
-                const filePath = filePaths[activeIndex]; // Now correctly fetches the file path
+                const files = @Html.Raw(Json.Serialize(Model.Files)); // Correct way
+                const fileId = files[activeIndex].id;
+
+                console.log(files);
+                console.log(activeIndex);
+                console.log(fileId);
+
 
                 // Send AJAX request to save the file
                 fetch('/Coding/SaveCode', {
@@ -333,7 +335,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
                     },
-                    body: JSON.stringify({ filePath: filePath, content: code })
+                    body: JSON.stringify({ FileId: fileId, Content: code })
                 })
                 .then(response => response.json())
                 .then(data => {

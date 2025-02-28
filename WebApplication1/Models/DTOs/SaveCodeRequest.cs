@@ -2,7 +2,7 @@
 {
     public class SaveCodeRequest
     {
-        public string FilePath { get; set; }
+        public int FileId { get; set; }
         public string Content { get; set; }
     }
 }
