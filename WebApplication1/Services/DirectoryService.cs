@@ -2,145 +2,95 @@
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-
+using WebApplication1.Models.DTOs;
+using WebApplication1.Models.Entities.CodingFiles;
+using WebApplication1.Data;
+using CloudinaryDotNet.Core;
+using System.Text;
 namespace WebApplication1.Services
 {
     public class DirectoryService
     {
-        public string GetTaskDirectory(int taskId)
+        ApplicationDbContext _context;
+
+        public DirectoryService(ApplicationDbContext context)
         {
-            return Path.Combine(AppConstants.CodingTasksDir, taskId.ToString());
+            _context = context;
+        }
+        private List<CodingFile> GetOriginalFilesFromFolder(CodingFolder folder)
+        {
+            if (folder == null) throw new ArgumentNullException(nameof(folder));
+            if (folder.Files == null) throw new NullReferenceException(nameof(folder.Files));
+            if (folder.Files.Count == 0)
+                return new List<CodingFile>();
+
+            return folder.Files
+                .ToList();
         }
 
-        public async Task InitializeTaskFolder(string folderDir, string language, string template = "")
+        public List<CodingFileDTO> GetFilesFromFolder(CodingFolder folder)
         {
-            if (Directory.Exists(folderDir))
-            {
-                throw new Exception("Directory already exists");
-            }
-
-            Directory.CreateDirectory(folderDir);
-
-            if (template == "")
-                template = language.ToLower();
-
-            string templatePath = Path.Combine(AppConstants.LanguageTemplatesDir, template);
-
-            foreach(string file in Directory.EnumerateFiles(templatePath))
-            {
-                File.Copy(file, Path.Combine(folderDir, Path.GetFileName(file)), false);
-            }
+            return GetOriginalFilesFromFolder(folder)
+                .Select(x => new CodingFileDTO(x))
+                .ToList();
         }
 
-        internal async Task ResetDirectory(string folderDir, string taskPath)
+        public async Task CopyTemplateToTask(int templateId, int taskId)
         {
-            if (!Directory.Exists(folderDir) || !Directory.Exists(taskPath))
-                throw new Exception("Directory not found");
+            TaskTemplate template = await _context.TaskTemplates
+                .Include(t => t.Folder)
+                    .ThenInclude(f => f.Files)
+                .SingleOrDefaultAsync(t => t.Id == templateId) ?? throw new ArgumentException(nameof(templateId));
 
-            Directory.Delete(folderDir, true);
-            Directory.CreateDirectory(folderDir);
+            CodingTask task = await _context.CodingTasks
+                .Include(t => t.Folder)
+                    .ThenInclude(f => f.Files)
+                .SingleOrDefaultAsync(t => t.Id == taskId) ?? throw new ArgumentException(nameof(taskId));
 
-            foreach (var file in Directory.EnumerateFiles(taskPath))
+
+            foreach (var file in template.Folder.Files)
             {
-                File.Copy(file, Path.Combine(folderDir, Path.GetFileName(file)));
+                var newFile = (CodingFile)file.Clone();
+                newFile.FolderId = task.FolderId;
+                _context.Files.Add(newFile);
             }
+
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteTaskDirectory(int id)
+        public async Task CreateUserTask(int userId, int taskId)
         {
-            string path = Path.Combine(AppConstants.CodingTasksDir, id.ToString());
-            if (Directory.Exists(path))
-            {
-                Directory.Delete(path, true);
-            }
+            CodingTask task = await _context.CodingTasks
+                .Include(t => t.Folder)
+                    .ThenInclude(f => f.Files)
+                .SingleOrDefaultAsync(t => t.Id == taskId) ?? throw new ArgumentException(nameof(taskId));
 
-            //Delete any user's copy of this task
-            foreach (var directory in Directory.EnumerateDirectories(AppConstants.UserCodingTasksDir))
-            {
-                if (Directory.Exists(Path.Combine(directory, id.ToString())))
-                    Directory.Delete(Path.Combine(directory, id.ToString()), true);
-            }
+            if(await _context.Users.SingleOrDefaultAsync(u => u.Id == userId) == null) throw new ArgumentException(nameof(userId));
+
+            //UserTask
         }
 
-        internal async Task<(string folderDir, string[] filePaths)> OpenTask(int taskId, int userId)
+        public List<CodingFile> GetFilteredFilesByRestriction(CodingFolder folder)
         {
-            #region Check task
-            string folderDir = Path.Combine(AppConstants.CodingTasksDir, taskId.ToString());
-            if (!Directory.Exists(folderDir))
-                throw new Exception("Task directory does not exists");
+            List<CodingFile> files = GetOriginalFilesFromFolder(folder);
 
-            string[] files = Directory.GetFiles(folderDir);
+            CodingFile? restricted = files.SingleOrDefault(f => f.Name == "restrictions" && f.Type == ".txt");
 
-            if (files.Length == 0)
-                throw new Exception("Task directory is empty");
+            if (restricted == null)
+                return files;
 
-            #endregion
+            string restrictedData = Encoding.UTF8.GetString(restricted.Data);
+            string[] restrictedNames = restrictedData.Split([',', ' ']);
 
-            #region Check user's task
+            List<CodingFile> remainingFiles = files
+                .Where(f => !restrictedNames.Contains(f.Name) &&
+                    !restrictedNames.Contains(f.Name + f.Type) && 
+                    f.Name + f.Type != "restricted.txt")
+                .ToList();
 
-            string path = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
-
-            if (Directory.Exists(path))
-            {
-                files = GetFilteredFilesByRestriction(path);
-                return (path,  files);
-            }
-
-            Directory.CreateDirectory(path);
-
-            //Copy each file from the original task to the current user's version
-            foreach (string file in files)
-            {
-                File.Copy(file, Path.Combine(path, Path.GetFileName(file)));
-            }
-
-            files = GetFilteredFilesByRestriction(path);
-            return (path, files);
-
-            #endregion
-
+            return remainingFiles;
         }
 
-        public string[] GetFilteredFilesByRestriction(string folderDir)
-        {
-            string[] files = Directory.GetFiles(folderDir);
-            if (File.Exists(Path.Combine(folderDir, "restrictedFiles.txt")))
-            {
-                string[] restrictedFiles = File.ReadAllText(Path.Combine(folderDir, "restrictedFiles.txt")).Split([',', ' ']);
-                //Excludes any restricted files
-                files = files
-                .Where(f => (!restrictedFiles
-                    .Any(rf => rf == Path.GetFileName(f))) &&
-                    Path.GetFileName(f) != "restrictedFiles.txt")
-                .ToArray();
-            }
-            return files;
-        }
-
-        public async Task ResetDirectory(int taskId, int userId)
-        {
-            string taskDir = GetTaskDirectory(taskId);
-            string folderDir = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
-
-            await ResetDirectory(folderDir, taskDir);
-        }
-
-        public async Task SaveSubmission(int taskId, int userId, int submissionId)
-        {
-            string folderDir = Path.Combine(AppConstants.UserCodingTasksDir, userId.ToString(), taskId.ToString());
-            string submitionDir = Path.Combine(AppConstants.TaskSubmissionsDir, taskId.ToString(), submissionId.ToString());
-            if (!Directory.Exists(folderDir))
-                throw new NullReferenceException();
-
-            if (Directory.Exists(submitionDir))
-                Directory.Delete(submitionDir, true);
-
-            Directory.CreateDirectory(submitionDir);
-
-            foreach(string file in Directory.EnumerateFiles(folderDir))
-            {
-                File.Copy(file, Path.Combine(submitionDir, Path.GetFileName(file)), true);
-            }
-        }
+        
     }
 }
