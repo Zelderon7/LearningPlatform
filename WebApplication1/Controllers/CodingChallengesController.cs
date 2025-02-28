@@ -33,6 +33,22 @@ namespace WebApplication1.Controllers
         }
 
         [Authorize]
+        public async Task<IActionResult> GetAssignments()
+        {
+            User user = await _userManager.GetUserAsync(User);
+
+            List<CodingTask> tasks = await _context.CodingTasks
+                .Include(ct => ct.Class)
+                    .ThenInclude(c => c.UserClasses)
+                .Where(ct => ct.ClassId != null)
+                .Where(ct => ct.Class.UserClasses
+                    .Any(uc => uc.UserId == user.Id))
+                .ToListAsync();
+
+            return View("Index", tasks);
+        }
+
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> OpenChallenge(int id)
         {

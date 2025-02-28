@@ -71,6 +71,10 @@ namespace WebApplication1
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+                
+                // Add detailed error page for troubleshooting the Institution controller issue
+                app.UseDeveloperExceptionPage();
+                
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -95,20 +99,35 @@ namespace WebApplication1
 
         private static async Task InitializeRoles(WebApplicationBuilder builder)
         {
-            var serviceProvider = builder.Services.BuildServiceProvider();
-            using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
-
-                string[] roleNames = { "ADMIN", "USER", "STUDENT", "TEACHER" };
-                foreach (var roleName in roleNames)
+            using(var serviceProvider = builder.Services.BuildServiceProvider()){
+                using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
                 {
-                    if (!await roleManager.RoleExistsAsync(roleName))
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+                    string[] roleNames = { "ADMIN", "USER", "STUDENT", "TEACHER" };
+                    foreach (var roleName in roleNames)
                     {
-                        await roleManager.CreateAsync(new Role { Name = roleName });
+                        if (!await roleManager.RoleExistsAsync(roleName))
+                        {
+                            var result = await roleManager.CreateAsync(new Role { Name = roleName });
+                            if (result.Succeeded)
+                            {
+                                logger.LogInformation($"Role '{roleName}' created successfully.");
+                            }
+                            else
+                            {
+                                logger.LogError($"Failed to create role '{roleName}': {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                            }
+                        }
+                        else
+                        {
+                            logger.LogInformation($"Role '{roleName}' already exists.");
+                        }
                     }
                 }
             }
+            
         }
     }
 }

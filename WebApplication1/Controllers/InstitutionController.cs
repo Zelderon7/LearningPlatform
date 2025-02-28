@@ -27,12 +27,18 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> Index()
         {
             User user = await _userManager.GetUserAsync(User);
-
+            
+            if (user == null)
+            {
+                return Challenge(); // Redirects to login if user is not authenticated
+            }
+            
+            var userId = user.Id;
             var institutions = await _context.Institutions
                 .Include(i => i.UserInstitutions)
-                .Where(i => i.UserInstitutions.Any(ui => ui.UserId == user.Id))
+                .Where(i => i.UserInstitutions != null && i.UserInstitutions.Any(ui => ui != null && ui.UserId == userId))
                 .Select(i => new InstitutionDTO(i))
-                .ToListAsync(); // Fetch institutions if needed
+                .ToListAsync();
 
             return View(institutions);
         }
@@ -156,17 +162,23 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> Discover()
         {
             User user = await _userManager.GetUserAsync(User);
+            
+            if (user == null)
+            {
+                return Challenge(); // Redirects to login if user is not authenticated
+            }
+            
             bool showPrivate = await _userManager.IsInRoleAsync(user, "ADMIN");
+            var userId = user.Id;
 
             var data = await _context.Institutions
                 .Include(i => i.JoinInstitutionRequests)
                 .Include(i => i.UserInstitutions)
                 .Where(i => showPrivate || i.IsPublic)
-                .Where(i => !i.JoinInstitutionRequests.Any(jir => jir.UserId == user.Id) 
-                    && !i.UserInstitutions.Any(ui => ui.UserId == user.Id))
+                .Where(i => (i.JoinInstitutionRequests == null || !i.JoinInstitutionRequests.Any(jir => jir != null && jir.UserId == userId))
+                    && (i.UserInstitutions == null || !i.UserInstitutions.Any(ui => ui != null && ui.UserId == userId)))
                 .Select(i => new InstitutionDTO(i))
                 .ToListAsync();
-
 
             return View(data);
         }
@@ -177,30 +189,42 @@ namespace WebApplication1.Controllers
             try
             {
                 User user = await _userManager.GetUserAsync(User);
+                
+                if (user == null)
+                {
+                    return Challenge(); // Redirects to login if user is not authenticated
+                }
+                
                 bool filterPrivateClasses = !await _userManager.IsInRoleAsync(user, "ADMIN");
+                var userId = user.Id;
 
                 Institution? inst = await _context.Institutions
                     .Include(i => i.Classes)
                         .ThenInclude(c => c.UserClasses)
                     .FirstOrDefaultAsync(i => i.InstitutionId == id);
 
-                inst.Classes = inst.Classes
-                    .Where(c => filterPrivateClasses ? c.IsPublic || c.UserClasses.Any(uc => uc.UserId == user.Id) : true)
-                    .ToList();
-
                 if (inst == null)
                     return NotFound();
 
+                if (inst.Classes != null)
+                {
+                    inst.Classes = inst.Classes
+                        .Where(c => c != null && (!filterPrivateClasses || c.IsPublic || 
+                            (c.UserClasses != null && c.UserClasses.Any(uc => uc != null && uc.UserId == userId))))
+                        .ToList();
+                }
+
                 if(!await _context.UserInstitutions
-                    .AnyAsync(ui => ui.InstitutionId == id && ui.UserId == user.Id))
+                    .AnyAsync(ui => ui.InstitutionId == id && ui.UserId == userId))
                 {
                     return Unauthorized();
                 }
 
                 return View("Institution", new FullInstitutionDTO(inst));
             }
-            catch
+            catch (Exception ex)
             {
+                // Log the exception if you have logging configured
                 return RedirectToAction("Index");
             }
         }
