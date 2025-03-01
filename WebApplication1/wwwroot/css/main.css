@@ -3890,4 +3890,12 @@ input::-moz-focus-inner {
 			transform: none;
 			opacity: 1;
 			visibility: visible;
+
+
 		}
+
+.container-fluid{
+	justify-content: center;
+	flex-wrap: wrap;
+	overflow-y: auto;
+}

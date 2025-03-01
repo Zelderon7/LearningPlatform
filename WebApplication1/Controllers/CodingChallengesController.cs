@@ -10,6 +10,8 @@ using WebApplication1.Models.Entities.CodingFiles;
 using WebApplication1.Models.VMs;
 using WebApplication1.Models.DTOs;
 using WebApplication1.Services;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace WebApplication1.Controllers
 {
@@ -118,7 +120,11 @@ namespace WebApplication1.Controllers
 
             User user = await _userManager.GetUserAsync(User);
 
-            ViewBag.Templates = new List<SelectListItem>() { };
+            List<SelectListItem> templates = await _context.TaskTemplates
+                .Select(t => new SelectListItem(t.Name, t.Id.ToString()))
+                .ToListAsync();
+
+            ViewBag.Templates = templates;
 
             ViewBag.Classes = await _context.UserClasses
                 .Include(uc => uc.User)
@@ -132,7 +138,7 @@ namespace WebApplication1.Controllers
 
         [Authorize(Roles = "TEACHER,ADMIN")]
         [HttpPost]
-        public async Task<IActionResult> Create(CodingTask data, string template, int classId)
+        public async Task<IActionResult> Create(CodingTask data, string templateId, int classId)
         {
             User user = await _userManager.GetUserAsync(User);
             data.AuthorId = user.Id;
@@ -148,7 +154,13 @@ namespace WebApplication1.Controllers
             
             try
             {
+                int tId = int.Parse(templateId);
                 await _directoryService.InitializeTaskFolder(data);
+
+                if(tId > 0)
+                {
+                    await _directoryService.CopyTemplateToTask(tId, data.Id);
+                }
             }
             catch (Exception ex)
             {
@@ -160,6 +172,61 @@ namespace WebApplication1.Controllers
             
 
             return RedirectToAction("OpenChallenge", data.Id);
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet]
+        public IActionResult CreateTemplate()
+        {
+            TaskTemplate model = new TaskTemplate();
+            ViewBag.Languages = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "python", Text = "Python" }
+            };
+
+            return View(model);
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpPost]
+        public async Task<IActionResult> CreateTemplate(TaskTemplate data)
+        {
+            if(data == null)
+                throw new ArgumentNullException("data");
+            
+            await _directoryService.InitializeTaskTemplate(data);            
+
+            return RedirectToAction("OpenTemplate", new { id = data.Id });
+        }
+
+        [Authorize(Roles = "ADMIN")]
+        [HttpGet]
+        public async Task<IActionResult> OpenTemplate(int id)
+        {
+            TaskTemplate? template = await _context.TaskTemplates
+                .Include(x => x.Folder)
+                .SingleOrDefaultAsync(x => x.Id == id);
+            if(template == null)
+                return NotFound();
+
+            List<CodingFileDTO> files = await _directoryService.GetFilteredFilesByRestriction(template.FolderId);
+
+            template.Folder = null;
+            CodingIDETemplateVM model1 = new CodingIDETemplateVM
+            {
+                Template = template,
+                Files = files
+            };
+
+
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+
+            Response.Cookies.Append("CodingIDETemplateVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
+
+            return RedirectToAction("GetTemplate", "Coding");
         }
     }
 }

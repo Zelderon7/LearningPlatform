@@ -207,5 +207,31 @@ namespace WebApplication1.Services
             _context.CodingFiles.Update(file);
             await _context.SaveChangesAsync();
         }
+
+        public async Task InitializeTaskTemplate(TaskTemplate data)
+        {
+            CodingFolder folder = new CodingFolder
+            {
+                Name = data.Id + "_" + data.Name,
+            };
+            try
+            {
+                _context.CodingFolders.Add(folder);
+                await _context.SaveChangesAsync();
+
+                data.FolderId = folder.Id;
+                _context.TaskTemplates.Add(data);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _context.CodingFolders.Remove(folder);
+                await _context.SaveChangesAsync();
+                _context.TaskTemplates.Remove(data);
+                await _context.SaveChangesAsync();
+            }
+            
+        }
+
     }
 }
