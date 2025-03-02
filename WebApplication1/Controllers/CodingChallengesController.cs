@@ -33,7 +33,12 @@ namespace WebApplication1.Controllers
                 .Where(x => x.ClassId == null)
                 .ToListAsync();
 
-             return View(model);
+            List<TaskTemplate> templates = await _context.TaskTemplates
+                .ToListAsync();
+
+            ViewBag.Templates = templates;
+
+            return View(model);
         }
 
 

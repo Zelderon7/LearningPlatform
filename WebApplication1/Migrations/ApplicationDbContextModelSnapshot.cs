@@ -17,7 +17,7 @@ namespace WebApplication1.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -621,8 +621,7 @@ namespace WebApplication1.Migrations
 
                     b.HasIndex("FolderId");
 
-                    b.HasIndex("TaskId")
-                        .IsUnique();
+                    b.HasIndex("TaskId");
 
                     b.HasIndex("UserId");
 
@@ -892,8 +891,8 @@ namespace WebApplication1.Migrations
                         .IsRequired();
 
                     b.HasOne("WebApplication1.Models.Entities.CodingFiles.CodingTask", "Task")
-                        .WithOne()
-                        .HasForeignKey("WebApplication1.Models.JoinTables.UserTask", "TaskId")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

@@ -43,6 +43,7 @@ namespace WebApplication1
 
             builder.Services.AddScoped<PodmanService>();
             builder.Services.AddScoped<DirectoryService>();
+            builder.Services.AddScoped<CodeExecutionService>();
 
 
 

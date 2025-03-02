@@ -3,17 +3,23 @@
 
 @{
     ViewData["Title"] = "Discover";
+	List<TaskTemplate> templates = ViewBag.Templates;
 }
 
 <!-- //Admin options -->
 @if (User.IsInRole("ADMIN"))
 {
 	<div style="display: flex; gap: 5px;">
-
-
 		<a class="btn btn-success" asp-action="Create" asp-controller="CodingChallenges">Create</a>
 		<a class="btn btn-primary" style="margin-left: 10px;" asp-action="CreateTemplate" asp-controller="CodingChallenges">Create Template</a>
-		<a class="btn btn-primary" style="margin-left: auto; margin-right: 10px;" asp-action="GetTemplates" asp-controller="CodingChallenges">Edit Template</a>
+        <select class="btn btn-primary" style="margin-left: auto; margin-right: 10px; width: fit-content" id="templateDropdown">
+            <option disabled selected>Edit Template</option>
+            @foreach (var template in templates)
+            {
+                <option value="@template.Id">@template.Name</option>
+            }
+        </select>
+
 	</div>
 }
 
@@ -49,3 +55,16 @@
     }
 
 </div>
+
+
+<script>
+    document.getElementById("templateDropdown").addEventListener("change", function () {
+        var selectedTemplateId = this.value;
+
+        if (selectedTemplateId) {
+            window.location.href = "/CodingChallenges/OpenTemplate?id=" + selectedTemplateId;
+            this.selectedIndex = 0; // Reset dropdown to default option
+        }
+    });
+
+</script>

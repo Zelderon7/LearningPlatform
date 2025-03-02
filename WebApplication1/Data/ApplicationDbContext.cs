@@ -48,8 +48,8 @@ namespace WebApplication1.Data
 
             builder.Entity<UserTask>()
                 .HasOne(t => t.Task)
-                .WithOne()
-                .HasForeignKey<UserTask>(t => t.TaskId) // Correct way to define FK
+                .WithMany()
+                .HasForeignKey(t => t.TaskId) // Correct way to define FK
                 .OnDelete(DeleteBehavior.Restrict); // Use Restrict, ClientSetNull, or another valid option
 
             builder.Entity<TaskSubmission>()

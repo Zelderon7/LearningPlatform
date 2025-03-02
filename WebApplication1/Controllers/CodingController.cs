@@ -22,12 +22,15 @@ namespace WebApplication1.Controllers
         UserManager<User> _userManager;
         ApplicationDbContext _context;
         DirectoryService _directoryService;
-        public CodingController(PodmanService podmanService, UserManager<User> userManager, ApplicationDbContext context, DirectoryService directoryService)
+        CodeExecutionService _codeExecutionService;
+        public CodingController(PodmanService podmanService, UserManager<User> userManager, 
+            ApplicationDbContext context, DirectoryService directoryService, CodeExecutionService codeExecutionService)
         {
             _podmanService = podmanService;
             _userManager = userManager;
             _context = context;
             _directoryService = directoryService;
+            _codeExecutionService = codeExecutionService;
         }
 
         [HttpGet]
@@ -90,20 +93,7 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<IActionResult> RunCode(CodingIDEVM data)
         {
-
-            throw new NotImplementedException();
-            (string output, string error) result = ("", "");
-
-            data.Output = result.output;
-            data.Error = result.error;
-
-            // Storing the complex model in TempData
-            var options = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddHours(2),
-                SameSite = SameSiteMode.Strict
-            };
-            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(data), options);
+            await _codeExecutionService.ExecuteFolderAsync((int)data.Task.FolderId);
 
             return RedirectToAction("Index");
         }

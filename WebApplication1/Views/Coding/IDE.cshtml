@@ -215,6 +215,7 @@
                     <input type="hidden" asp-for="Task.Id" />
                     <input type="hidden" asp-for="Task.Name" />
                     <input type="hidden" asp-for="Task.Description" />
+                    <input type="hidden" asp-for="Task.FolderId" />
                     <input type="hidden" asp-for="Task.AuthorId" />
                     <input type="hidden" asp-for="Task.Language" />
 
@@ -230,7 +231,7 @@
                         }
                     }
 
-                    <button type="submit" id="submitButton">Submit Code</button>
+                    <button type="submit" id="submitButton">Run Code</button>
                 </form>
                 <a class="button button-danger" asp-action="ResetCode" asp-route-taskId="@Model.Task.Id">Reset Code</a>
                 @if(isValidSolution){
