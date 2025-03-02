@@ -6,6 +6,8 @@ using CloudinaryDotNet.Actions;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models.Entities.CodingFiles;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using WebApplication1.Models.DTOs;
 
 
 namespace WebApplication1.Services
@@ -20,7 +22,7 @@ namespace WebApplication1.Services
             _context = context;
         }
 
-        public async Task<bool> ExecuteFolderAsync(int folderId)
+        public async Task<CodeExecutionResponse> ExecuteFolderAsync(int folderId)
         {
             CodingFolder? folder = await _context.CodingFolders
                 .Include(x => x.Files)
@@ -55,17 +57,32 @@ namespace WebApplication1.Services
                     // Step 4: Check if the response is successful
                     if (response.IsSuccessStatusCode)
                     {
-                        return true; // Execution was successful
+                        string responseString = await response.Content.ReadAsStringAsync();
+                        CodeExecutionResponse result = JsonConvert.DeserializeObject<CodeExecutionResponse>(responseString);
+
+                        // Check if the execution was successful
+                        if (result.Success)
+                        {
+                            Console.WriteLine("Execution succeeded!");
+                            Console.WriteLine($"Output: {result.Output}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Execution failed!");
+                            Console.WriteLine($"Error: {result.Error}");
+                        }
+
+                        return result;
                     }
                     else
                     {
-                        return false; // Error occurred in API execution
+                        throw new Exception(response.StatusCode.ToString()); // Error occurred in API execution
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     // Handle exception (e.g., network issue, API unavailable)
-                    return false;
+                    throw e;
                 }
             }
         }

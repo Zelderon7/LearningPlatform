@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Identity;
 using WebApplication1.Data;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Models.Entities.CodingFiles;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace WebApplication1.Controllers
 {
@@ -93,7 +96,50 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<IActionResult> RunCode(CodingIDEVM data)
         {
-            await _codeExecutionService.ExecuteFolderAsync((int)data.Task.FolderId);
+                      
+
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+
+            CodingTask? task = await _context.CodingTasks
+                .Include(t => t.Folder)
+                    .ThenInclude(f => f.Files)
+                .SingleOrDefaultAsync(t => t.Id == data.Task.Id);
+
+            if (task == null)
+                return NotFound();
+
+            List<CodingFileDTO> files = task.Folder.Files
+                .Select(x => new CodingFileDTO(x))
+                .ToList();
+
+            CodeExecutionResponse result;
+
+            try
+            {
+                result = await _codeExecutionService.ExecuteFolderAsync((int)data.Task.FolderId);
+            }
+            catch (Exception _)
+            {
+                result = new CodeExecutionResponse
+                {
+                    Error = "Internal Server Error, try again later :(",
+                    Output = "",
+                    Success = false
+                };
+            }
+
+            CodingIDEVM model1 = new CodingIDEVM
+            {
+                Task = data.Task,
+                Files = files,
+                Output = result.Output,
+                Error = result.Error,
+            };
+
+            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
 
             return RedirectToAction("Index");
         }

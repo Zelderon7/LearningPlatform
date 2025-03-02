@@ -234,6 +234,7 @@
                     <button type="submit" id="submitButton">Run Code</button>
                 </form>
                 <a class="button button-danger" asp-action="ResetCode" asp-route-taskId="@Model.Task.Id">Reset Code</a>
+                <button onclick="saveDocument()">Save File</button>
                 @if(isValidSolution){
                     <a class="btn button btn-success" asp-action="SubmitTask" asp-route-taskId="@Model.Task.Id" type="submit" id="submitSolutionButton" style="background-color: #43c570; margin-left: auto;">Submit</a>
                 }
@@ -314,46 +315,50 @@
 
         });
 
+        function saveDocument(){
+            const activeTab = document.querySelector('.file-tab.active');
+            const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
+            const code = editors[activeIndex].getValue();
+            const files = @Html.Raw(Json.Serialize(Model.Files)); // Correct way
+            const fileId = files[activeIndex].id;
+
+            console.log(files);
+            console.log(activeIndex);
+            console.log(fileId);
+
+
+            // Send AJAX request to save the file
+            fetch('/Coding/SaveCode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ FileId: fileId, Content: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('File saved successfully!');
+                    outputContainer.innerHTML = `<p style="color: green;">File saved successfully!</p>`;
+                } else {
+                    console.error('Error saving file:', data.message);
+                    outputContainer.innerHTML = `<p style="color: red;">Error saving file: ${data.message}</p>`;
+                }
+
+                document.getElementById('submitSolutionButton')?.remove();
+            })
+            .catch(error => {
+                console.error('Request failed:', error);
+                outputContainer.innerHTML = `<p style="color: red;">Failed to save file.</p>`;
+            });
+        }
+
         document.addEventListener('keydown', function (event) {
             if (event.ctrlKey && event.key === 's') {
                 event.preventDefault(); // Prevent default browser save
 
-                const activeTab = document.querySelector('.file-tab.active');
-                const activeIndex = activeTab ? parseInt(activeTab.getAttribute('data-index')) : 0;
-                const code = editors[activeIndex].getValue();
-                const files = @Html.Raw(Json.Serialize(Model.Files)); // Correct way
-                const fileId = files[activeIndex].id;
-
-                console.log(files);
-                console.log(activeIndex);
-                console.log(fileId);
-
-
-                // Send AJAX request to save the file
-                fetch('/Coding/SaveCode', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                    },
-                    body: JSON.stringify({ FileId: fileId, Content: code })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        console.log('File saved successfully!');
-                        outputContainer.innerHTML = `<p style="color: green;">File saved successfully!</p>`;
-                    } else {
-                        console.error('Error saving file:', data.message);
-                        outputContainer.innerHTML = `<p style="color: red;">Error saving file: ${data.message}</p>`;
-                    }
-                    
-                    document.getElementById('submitSolutionButton')?.remove();
-                })
-                .catch(error => {
-                    console.error('Request failed:', error);
-                    outputContainer.innerHTML = `<p style="color: red;">Failed to save file.</p>`;
-                });
+                saveDocument();
             }
         });
 
