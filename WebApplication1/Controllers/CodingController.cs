@@ -119,13 +119,17 @@ namespace WebApplication1.Controllers
 
             try
             {
+#if RELEASE
                 result = await _codeExecutionService.ExecuteFolderAsync((int)data.Task.FolderId);
+#else
+                result = await _podmanService.ExecuteFolderAsync((int)data.Task.FolderId);
+#endif
             }
-            catch (Exception _)
+            catch (Exception e)
             {
                 result = new CodeExecutionResponse
                 {
-                    Error = "Internal Server Error, try again later :(",
+                    Error = $"(500) {e}",
                     Output = "",
                     Success = false
                 };

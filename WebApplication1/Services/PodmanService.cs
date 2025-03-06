@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
+using WebApplication1.Data;
+using WebApplication1.Models.DTOs;
 using WebApplication1.Models.Entities.CodingFiles;
 
 namespace WebApplication1.Services
@@ -6,31 +9,26 @@ namespace WebApplication1.Services
     public class PodmanService
     {
         private readonly string _podmanExecutable;
+        ApplicationDbContext _context;
 
-        public PodmanService()
+        public PodmanService(ApplicationDbContext context)
         {
             // Default Podman executable path
             _podmanExecutable = "podman"; // If podman is in your system path. Adjust if needed.
+            _context = context;
         }
 
-        public async Task<(string output, string error)> RunFolderAsync(CodingTask task, string folderPath)
+        public async Task<(string output, string error)> RunFolderAsync(string language, string folderPath)
         {
-            if (task == null)
-                throw new ArgumentNullException(nameof(task));
-
-            if (string.IsNullOrEmpty(folderPath) || !Directory.Exists(folderPath))
-            {
-                throw new ArgumentException("Invalid folder path.", nameof(folderPath));
-            }
 
             string[] fileNames = Directory.GetFiles(folderPath)
                 .Select(x => Path.GetFileName(x))
                 .ToArray();
             
-            string starterFile = GetStartFileFromLanguage(task.Language, fileNames);
-            string imageName = GetImageFromLanguage(task.Language, starterFile);
+            string starterFile = GetStartFileFromLanguage(language, fileNames);
+            string imageName = GetImageFromLanguage(language, starterFile);
             
-
+            
             if (string.IsNullOrEmpty(starterFile))
             {
                 throw new FileNotFoundException("No starter file found");
@@ -81,7 +79,7 @@ namespace WebApplication1.Services
             switch (language.ToLower())
             {
                 case "python":
-                    return fileNames.SingleOrDefault(x => x == "main.py" || x == "tests.py") ?? string.Empty;
+                    return fileNames.SingleOrDefault(x => x == "script.py" || x == "tests.py") ?? string.Empty;
 
                 default:
                     throw new NotSupportedException($"{language} is not supported yet");
@@ -98,6 +96,60 @@ namespace WebApplication1.Services
                 default:
                     throw new NotSupportedException($"{language} is not supported yet");
             }
+        }
+
+        internal async Task<CodeExecutionResponse> ExecuteFolderAsync(int folderId)
+        {
+            CodingFolder? folder = await _context.CodingFolders
+                .Include(f => f.Files)
+                .SingleOrDefaultAsync(x => x.Id == folderId);
+
+            if (folder == null)
+                throw new Exception("Folder not found");
+
+            CodeExecutionResponse response = new CodeExecutionResponse()
+            {
+                Output = "",
+                Error = "Internal server error! :(",
+                Success = false,
+            };
+
+            string folderPath = SaveInTempFolder(folder);
+            try
+            {
+                var result = await RunFolderAsync("python", folderPath);
+                response.Output = result.output;
+                response.Error = result.error;
+                response.Success = result.output.Length > 0 && result.error.Length == 0;
+            }
+            catch (Exception ex)
+            {
+                response.Error = "(500) " + ex.Message;
+            }
+            finally
+            {
+                Directory.Delete(folderPath, true);
+            }
+
+            return response;
+        }
+
+        private string SaveInTempFolder(CodingFolder folder)
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            Directory.CreateDirectory(tempPath);
+
+            foreach (var file in folder.Files)
+            {
+                // Create a unique file path
+                string filePath = Path.Combine(tempPath, file.Name + file.Type);
+
+                // Write the byte array to a file
+                File.WriteAllBytes(filePath, file.Data);
+            }
+
+            return tempPath;
+
         }
     }
 }
