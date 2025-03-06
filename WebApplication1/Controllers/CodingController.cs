@@ -58,22 +58,30 @@ namespace WebApplication1.Controllers
 
         [Authorize(Roles = "ADMIN")]
         [HttpGet]
-        public IActionResult GetTemplate()
+        public async Task<IActionResult> GetTemplate(int templateId)
         {
-            if (Request.Cookies.TryGetValue("CodingIDETemplateVMModel", out string data))
+            TaskTemplate? template = await _context.TaskTemplates
+                .Include(x => x.Folder)
+                .SingleOrDefaultAsync(x => x.Id == templateId);
+
+            List<CodingFileDTO> files = await _directoryService.GetFilteredFilesByRestriction(template.FolderId);
+
+            template.Folder = null;
+            CodingIDETemplateVM model = new CodingIDETemplateVM
             {
-                var model = JsonConvert.DeserializeObject<CodingIDETemplateVM>(data);
-                if (model.Output.Contains("FAILED") || model.Output.Length == 0)
-                {
-                    ViewData["IsValidSolution"] = false;
-                }
-                else
-                {
-                    ViewData["IsValidSolution"] = true;
-                }
-                return View("IDETemplate", model);
+                Template = template,
+                Files = files
+            };
+
+            if (model.Output.Contains("FAILED") || model.Output.Length == 0)
+            {
+                ViewData["IsValidSolution"] = false;
             }
-            return NotFound();
+            else
+            {
+                ViewData["IsValidSolution"] = true;
+            }
+            return View("IDETemplate", model);
         }
 
         [HttpPost]

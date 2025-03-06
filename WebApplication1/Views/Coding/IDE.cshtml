@@ -234,7 +234,7 @@
                     <button type="submit" id="submitButton">Run Code</button>
                 </form>
                 <a class="button button-danger" asp-action="ResetCode" asp-route-taskId="@Model.Task.Id">Reset Code</a>
-                <button onclick="saveDocument()">Save File</button>
+                <button onclick="saveDocument()">Save File</button> 
                 @if(isValidSolution){
                     <a class="btn button btn-success" asp-action="SubmitTask" asp-route-taskId="@Model.Task.Id" type="submit" id="submitSolutionButton" style="background-color: #43c570; margin-left: auto;">Submit</a>
                 }

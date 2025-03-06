@@ -214,24 +214,8 @@ namespace WebApplication1.Controllers
             if(template == null)
                 return NotFound();
 
-            List<CodingFileDTO> files = await _directoryService.GetFilteredFilesByRestriction(template.FolderId);
-
-            template.Folder = null;
-            CodingIDETemplateVM model1 = new CodingIDETemplateVM
-            {
-                Template = template,
-                Files = files
-            };
-
-
-            var cookieOptions = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddHours(2)
-            };
-
-            Response.Cookies.Append("CodingIDETemplateVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
-
-            return RedirectToAction("GetTemplate", "Coding");
+           
+            return RedirectToAction("GetTemplate", "Coding", new {templateId = id});
         }
     }
 }
