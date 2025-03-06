@@ -72,45 +72,7 @@ namespace WebApplication1.Controllers
             if (user == null)
                 return Challenge();
 
-            var cookieOptions = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddHours(2)
-            };
-
-            List<CodingFileDTO> files;
-
-            if (task.AuthorId == user.Id)
-            {
-                #region Open original directory
-
-                files = await _directoryService.GetFilteredFilesByRestriction((int)task.FolderId);
-
-                task.Folder = null; //Ensures no self referencing loops
-                CodingIDEVM model1 = new CodingIDEVM
-                {
-                    Task = task,
-                    Files = files
-                };
-
-                Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
-
-                return RedirectToAction("Index", "Coding");
-
-                #endregion
-            }
-
-            files = await _directoryService.OpenUserTask(id, user.Id);
-
-            task.Folder = null; //Ensures no self referencing loops
-            CodingIDEVM model = new CodingIDEVM
-            {
-                Task = task,
-                Files = files,
-            };
-
-            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model), cookieOptions);
-
-            return RedirectToAction("Index", "Coding");
+            return RedirectToAction("Index", "Coding", new {taskId = task.Id});
         }
         
         [Authorize(Roles = "ADMIN,TEACHER")]

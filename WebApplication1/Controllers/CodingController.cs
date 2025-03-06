@@ -37,22 +37,61 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(int taskId, string output = "", string error = "")
         {
-            if (Request.Cookies.TryGetValue("CodingIDEVMModel", out string data))
+
+            CodingTask? task = await _context.CodingTasks
+                .SingleOrDefaultAsync(c => c.Id == taskId);
+
+
+            User? user = await _userManager.GetUserAsync(User);
+
+            List<CodingFileDTO> files;
+
+            CodingIDEVM model;
+
+            if (task.AuthorId == user.Id)
             {
-                var model = JsonConvert.DeserializeObject<CodingIDEVM>(data);
-                if (model.Output.Contains("FAILED") || model.Output.Length == 0)
+                #region Open original directory
+
+                files = await _directoryService.GetFilteredFilesByRestriction((int)task.FolderId);
+
+                task.Folder = null; //Ensures no self referencing loops
+                model = new CodingIDEVM
                 {
-                    ViewData["IsValidSolution"] = false;
-                }
-                else
-                {
-                    ViewData["IsValidSolution"] = true;
-                }
-                return View("IDE", model);
+                    Task = task,
+                    Files = files,
+                    Output = output,
+                    Error = error,
+                };
+
+                #endregion
             }
-            return NotFound();
+            else
+            {
+                files = await _directoryService.OpenUserTask(taskId, user.Id);
+
+                task.Folder = null; //Ensures no self referencing loops
+                model = new CodingIDEVM
+                {
+                    Task = task,
+                    Files = files,
+                    Output = output,
+                    Error = error,
+                };
+            }
+            
+
+            if (model.Output.Contains("FAILED") || model.Output.Length == 0)
+            {
+                ViewData["IsValidSolution"] = false;
+            }
+            else
+            {
+                ViewData["IsValidSolution"] = true;
+            }
+
+            return View("IDE", model);
         }
 
 
@@ -143,17 +182,8 @@ namespace WebApplication1.Controllers
                 };
             }
 
-            CodingIDEVM model1 = new CodingIDEVM
-            {
-                Task = data.Task,
-                Files = files,
-                Output = result.Output,
-                Error = result.Error,
-            };
 
-            Response.Cookies.Append("CodingIDEVMModel", JsonConvert.SerializeObject(model1), cookieOptions);
-
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new {taskId = task.Id, output = result.Output, error = result.Error});
         }
         
         [Authorize]
