@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using WebApplication1.Data;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.Entities.CodingFiles;
 
 namespace WebApplication1.Controllers
 {
@@ -192,6 +194,31 @@ namespace WebApplication1.Controllers
                 return NotFound();
 
             return View("ClassSection", section);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> GetCodingTasks(int classId)
+        {
+            User user = await _userManager.GetUserAsync(User);
+            bool isStudent = await _userManager.IsInRoleAsync(user, "STUDENT");
+
+            List<CodingTask> tasks;
+
+            if (isStudent)
+            {
+                bool isInClass = await _context.UserClasses
+                    .AnyAsync(uc => uc.UserId == user.Id && uc.ClassId == classId);
+
+                if(!isInClass)
+                    return View("ViewTasks", new List<CodingTask>());
+            }
+
+            tasks = await _context.CodingTasks
+                .Where(x => x.ClassId == classId)
+                .ToListAsync();
+
+            return View("ViewTasks", tasks);
         }
     }
 }

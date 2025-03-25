@@ -138,7 +138,7 @@ namespace WebApplication1.Controllers
             }
             
 
-            return RedirectToAction("OpenChallenge", data.Id);
+            return RedirectToAction("OpenChallenge", new { id = data.Id });
         }
 
         [Authorize(Roles = "ADMIN")]

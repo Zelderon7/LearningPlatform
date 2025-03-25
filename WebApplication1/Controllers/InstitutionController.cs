@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using WebApplication1.Data;
 using WebApplication1.Models.DTOs;
 using WebApplication1.Models.Entities;
+using WebApplication1.Models.Entities.CodingFiles;
 
 namespace WebApplication1.Controllers
 {
