@@ -100,7 +100,7 @@ namespace WebApplication1.Services
         {
             List<CodingFile> files = GetOriginalFilesFromFolder(folder);
 
-            CodingFile? restricted = files.SingleOrDefault(f => f.Name == "restrictions" && f.Type == ".txt");
+            CodingFile? restricted = files.SingleOrDefault(f => (f.Name == "restrictions" || f.Name == "restrictedFiles") && f.Type == ".txt");
 
             if (restricted == null)
                 return files;
@@ -111,7 +111,8 @@ namespace WebApplication1.Services
             List<CodingFile> remainingFiles = files
                 .Where(f => !restrictedNames.Contains(f.Name) &&
                     !restrictedNames.Contains(f.Name + f.Type) && 
-                    f.Name + f.Type != "restricted.txt")
+                    f.Name + f.Type != "restricted.txt" &&
+                    f.Name + f.Type != "restrictedFiles.txt")
                 .ToList();
 
             return remainingFiles;

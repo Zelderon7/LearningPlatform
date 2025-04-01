@@ -143,13 +143,6 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<IActionResult> RunCode(CodingIDEVM data)
         {
-                      
-
-            var cookieOptions = new CookieOptions
-            {
-                Expires = DateTime.UtcNow.AddHours(2)
-            };
-
             CodingTask? task = await _context.CodingTasks
                 .Include(t => t.Folder)
                     .ThenInclude(f => f.Files)
@@ -239,8 +232,6 @@ namespace WebApplication1.Controllers
         }
         public async Task<IActionResult> SubmitTask(int taskId)
         {
-
-            throw new NotImplementedException();
             User user = await _userManager.GetUserAsync(User);
 
             TaskSubmission submission = new TaskSubmission();
@@ -249,8 +240,6 @@ namespace WebApplication1.Controllers
 
             _context.CodingTaskSubmissions.Add(submission);
             await _context.SaveChangesAsync();
-
-            //await _directoryService.SaveSubmission(taskId, user.Id, submission.Id);
 
             return RedirectToAction("OpenChallenge", "CodingChallenges", new { id = taskId });
         }
