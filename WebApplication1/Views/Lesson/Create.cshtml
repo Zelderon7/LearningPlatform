@@ -11,7 +11,7 @@
     <input asp-for="ClassSectionId" type="hidden" />
 
     <h3>Contents</h3>
-    <div id="contents-list">
+    <div class="lesson-container" id="contents-list">
         <!-- Contents will be dynamically added here -->
     </div>
 
@@ -149,3 +149,10 @@
         });
     </script>
 }
+
+<style>
+    .lesson-container {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+</style>

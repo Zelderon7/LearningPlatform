@@ -7,11 +7,19 @@
 @{
 }
 
-<h1>@Model.Title</h1>
 
-@foreach (var item in Model.Contents.OrderBy(l => l.OrderIndex))
-{
-	<div class="lesson-content-view">
-		<partial name="../Lesson/Partials/_LessonContentPartial" model="@new LessonContentVM(item)" />
-	</div>
-}
+<div class="lesson-container">
+	<h2>@Model.Title</h2>
+	@foreach (var item in Model.Contents.OrderBy(l => l.OrderIndex))
+	{
+		<div class="lesson-content-view">
+			<partial name="../Lesson/Partials/_LessonContentPartial" model="@new LessonContentVM(item)" />
+		</div>
+	}
+</div>
+
+<style>
+	.lesson-container{
+		padding-left: 2rem;
+	}
+</style>
