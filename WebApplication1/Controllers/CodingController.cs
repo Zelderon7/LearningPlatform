@@ -54,7 +54,7 @@ namespace WebApplication1.Controllers
             {
                 #region Open original directory
 
-                files = await _directoryService.GetFilteredFilesByRestriction((int)task.FolderId);
+                files = await _directoryService.GetFilesFromFolder((int)task.FolderId);
 
                 task.Folder = null; //Ensures no self referencing loops
                 model = new CodingIDEVM
@@ -158,12 +158,12 @@ namespace WebApplication1.Controllers
             CodeExecutionResponse result;
 
             try
-            {
+            {/*
 #if RELEASE
                 result = await _codeExecutionService.ExecuteFolderAsync((int)data.Task.FolderId);
-#else
+#else*/
                 result = await _podmanService.ExecuteFolderAsync((int)data.Task.FolderId);
-#endif
+//#endif
             }
             catch (Exception e)
             {

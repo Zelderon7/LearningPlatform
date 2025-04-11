@@ -49,8 +49,8 @@ namespace WebApplication1.Data
             builder.Entity<UserTask>()
                 .HasOne(t => t.Task)
                 .WithMany()
-                .HasForeignKey(t => t.TaskId) // Correct way to define FK
-                .OnDelete(DeleteBehavior.Restrict); // Use Restrict, ClientSetNull, or another valid option
+                .HasForeignKey(t => t.TaskId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<TaskSubmission>()
                 .HasOne(t => t.Folder)

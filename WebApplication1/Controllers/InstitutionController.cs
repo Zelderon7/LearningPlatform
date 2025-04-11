@@ -75,7 +75,7 @@ namespace WebApplication1.Controllers
                 // Get the referer URL from the request headers
                 var refererUrl = Request.Headers["Referer"].ToString();
                 return Redirect(refererUrl);
-            }
+            } 
             catch (Exception ex)
             {
                 ViewData["Error"] = "An error occurred. Please try again.";

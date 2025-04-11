@@ -30,8 +30,18 @@ namespace WebApplication1.Services
                 .ToList();
         }
 
-        public List<CodingFileDTO> GetFilesFromFolder(CodingFolder folder)
+        public async Task<List<CodingFileDTO>> GetFilesFromFolder(int taskId)
         {
+            CodingFolder? folder = await _context.CodingTasks
+                .Include(t => t.Folder)
+                    .ThenInclude(f => f.Files)
+                .Where(t => t.Id == taskId)
+                .Select(ct => ct.Folder)
+                .SingleOrDefaultAsync();
+
+            if (folder == null)
+                return await GetFilteredFilesByRestriction(taskId);
+
             return GetOriginalFilesFromFolder(folder)
                 .Select(x => new CodingFileDTO(x))
                 .ToList();

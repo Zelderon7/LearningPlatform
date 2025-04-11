@@ -13,15 +13,17 @@
 </div>
 <div class="spacer"></div>
 
-<!-- Admin Options -->
-@if (User.IsInRole("ADMIN"))
-{
-    <div class="admin-options">
-        <a class="btn btn-primary" asp-action="GetCodingTasks" asp-route-classId="@Model.ClassId">Assigments</a>
+
+<div class="admin-options">
+    <a class="btn btn-primary" asp-action="GetCodingTasks" asp-route-classId="@Model.ClassId">Assigments</a>
+    <!-- Admin Options -->
+    @if (User.IsInRole("ADMIN"))
+    {
         <a class="btn btn-success" asp-controller="Class" asp-action="CreateSection" asp-route-classId="@Model.ClassId">Add Section</a>
         <a class="btn btn-primary" asp-controller="Class" asp-action="GetUsersToAdd" asp-route-classId="@Model.ClassId">Add Participant</a>
-    </div>
-}
+    
+    }
+</div>
 
 
 

@@ -1,5 +1,6 @@
-﻿@model WebApplication1.Models.VMs.LessonVM
+﻿@model WebApplication1.Models.VMs.LessonVM;
 
+<div class="lesson-container">
 <h2>Create Lesson</h2>
 
 <form asp-action="Create" method="post">
@@ -11,7 +12,7 @@
     <input asp-for="ClassSectionId" type="hidden" />
 
     <h3>Contents</h3>
-    <div class="lesson-container" id="contents-list">
+    <div id="contents-list">
         <!-- Contents will be dynamically added here -->
     </div>
 
@@ -41,7 +42,7 @@
         </div>
     </div>
 </div>
-
+</div>
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>

@@ -16,7 +16,7 @@ namespace WebApplication1
         {
             var builder = WebApplication.CreateBuilder(args);
             string connectionString;
-#if DEBUG
+#if RELEASE
             // Add services to the container.
             connectionString = builder.Configuration.GetConnectionString("ReleaseConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 #else
