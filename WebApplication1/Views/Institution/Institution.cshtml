@@ -16,7 +16,7 @@
 <div class="spacer"></div>
 
 <!-- Admin options -->
-@if(User.IsInRole("ADMIN")){
+@if(User.IsInRole("ADMIN") || User.IsInRole("TEACHER")){
     <div class="admin-options">
         <a class="btn btn-success" asp-controller="Class" asp-action="Create" asp-route-instId="@Model.Id">Create Class</a>
         <a class="btn btn-primary" asp-controller="Institution" asp-action="GetRequests" asp-route-instId="@Model.Id">Manage Requests</a>

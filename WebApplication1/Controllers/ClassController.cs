@@ -158,7 +158,7 @@ namespace WebApplication1.Controllers
             return Redirect(Request.Headers["Referer"].ToString());
         }
 
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpGet]
         public IActionResult CreateSection(int classId)
         {
@@ -166,7 +166,7 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpPost]
         public async Task<IActionResult> CreateSection(ClassSection section)
         {

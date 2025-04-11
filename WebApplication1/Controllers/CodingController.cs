@@ -54,7 +54,7 @@ namespace WebApplication1.Controllers
             {
                 #region Open original directory
 
-                files = await _directoryService.GetFilesFromFolder((int)task.FolderId);
+                files = await _directoryService.GetFilesFromFolder(task.Id);
 
                 task.Folder = null; //Ensures no self referencing loops
                 model = new CodingIDEVM

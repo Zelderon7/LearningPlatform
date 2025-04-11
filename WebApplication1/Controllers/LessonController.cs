@@ -60,6 +60,7 @@ namespace WebApplication1.Controllers
 
         }
 
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpGet]
         public async Task<IActionResult> Create(int classSectionId)
         {
@@ -82,6 +83,7 @@ namespace WebApplication1.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "ADMIN,TEACHER")]
         [HttpPost]
         public async Task<IActionResult> Create(LessonVM lessonVM)
         {

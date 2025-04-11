@@ -13,7 +13,7 @@
 </div>
 <div style="height: 30px;"></div>
 
-@if(User.IsInRole("ADMIN")){
+@if(User.IsInRole("ADMIN") || User.IsInRole("TEACHER")){
 	<div class="admin-options">
 		<a class="btn btn-success" asp-controller="Lesson" asp-action="Create" asp-route-classSectionId="@Model.Id">New Lesson</a>
 	</div>	
